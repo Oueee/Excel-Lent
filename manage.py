@@ -12,7 +12,7 @@ dirs_to_clean = ['bin', 'docs', 'tree']
 
 ### compile parts
 def make():
-    call(['javac -d bin -sourcepath src src/main/core/ExcelLent.java'], shell=True)
+    call(['javac -d bin -sourcepath src/main src/main/core/ExcelLent.java'], shell=True)
     #call(['javac -d bin -sourcepath src -cp "lib/*" src/com/sample/DroolsTest.java'], shell=True)
 
 ### configure parts
@@ -30,7 +30,7 @@ def doc():
 ### run parts
 def run():
     os.chdir('bin')
-    call(['java main.core.ExcelLent'], shell=True)
+    call(['java core.ExcelLent'], shell=True)
     #call(['java -cp "bin:lib/*:." com.sample.DroolsTest'], shell=True)
 
 

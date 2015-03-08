@@ -1,12 +1,12 @@
-package main.core;
+package core;
 
 import java.io.File;
 import java.net.URL;
 import java.io.FileInputStream;
 import java.lang.Exception;
 
-import main.util.Log;
-import main.connection.GenomeManager;
+import util.Log;
+import connection.GenomeManager;
 import org.json.JSONObject;
 
 
