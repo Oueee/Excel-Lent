@@ -8,6 +8,7 @@ import java.lang.Exception;
 import util.Log;
 import connection.GenomeManager;
 import org.json.JSONObject;
+import java.net.UnknownHostException;
 
 
 public class ExcelLent {
@@ -23,7 +24,7 @@ public class ExcelLent {
         
         JSONObject urls = getUrls(urls_path);
 
-        Log.i("Initializing the three genome manager");
+        Log.i("Initializing genomes managers");
         
         try{
             virusesManager = new GenomeManager(new File(tree_root, "Viruses"),
@@ -36,10 +37,12 @@ public class ExcelLent {
             Log.e(e);
         }
         
-        Log.i("Getting the lists and checking what to update");
-        virusesManager.AddSpeciesThreads();
-        eukaryotesManager.AddSpeciesThreads();
-        prokaryotesManager.AddSpeciesThreads();
+        Log.i("Getting lists and checking what to update/remove");
+
+            virusesManager.AddSpeciesThreads();
+            eukaryotesManager.AddSpeciesThreads();
+            prokaryotesManager.AddSpeciesThreads();
+        
 	}
 	
 	
@@ -56,6 +59,6 @@ public class ExcelLent {
             Log.e(e);
         }
         
-        return (JSONObject) new JSONObject(urls).get("urls");
+        return (JSONObject) new JSONObject(urls);
 	}
 }

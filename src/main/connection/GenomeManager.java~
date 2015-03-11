@@ -1,20 +1,240 @@
-package main.connection;
+package connection;
 
 import java.util.EventListener;
 import java.io.File;
-import main.util.Log;
+import java.io.PrintWriter;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.text.ParseException;
+import java.util.Scanner;
+
+import util.Log;
+import org.json.JSONObject;
+
 
 /**
  * Manages the species
  * 
  * Downloads the list of species and determines which have to be updated
  */
-public class SpeciesManager {
+public class GenomeManager {
+	private File root_path;
+	private File list_species;
+	private URL url;
 	
-	public SpeciesManager (String root_path) { //EventListener listener
-		Log.i(root_path);
-		//File dir = new File("C:\\user\\Desktop\\dir1\\dir2");
-        //dir.mkdirs();
-	}
+	private static final int BUFFER_SIZE = 4096;
+	
+	public GenomeManager (File root_path, URL url) {
+        this.root_path = root_path;
+        this.list_species = new File(this.root_path, "done.json");
+        this.url = url;
 
+        //If it's the first run, we initialize it
+		if(!this.root_path.exists()) {
+		    Log.i("create the kingdom " + this.root_path.getName());
+		    this.root_path.mkdirs();
+		    
+		    writeDoneFile("{}");
+		}
+    }
+    
+    public void AddSpeciesThreads(){//ExecutorService pool) {
+        try{
+            FileInputStream fis = new FileInputStream(this.list_species);
+            byte[] data = new byte[(int) this.list_species.length()];
+            fis.read(data);
+            fis.close();
+            JSONObject oldSpecies = new JSONObject(new String(data, "UTF-8"));
+
+            JSONObject newSpecies = getSpecies(oldSpecies);
+            writeDoneFile(newSpecies.toString(2));
+            
+        } catch(IOException e) {
+            Log.e(e);
+        }
+    }
+    
+    private JSONObject getSpecies(JSONObject oldSpecies) throws IOException {
+        JSONObject newSpecies = new JSONObject();
+
+        HttpURLConnection httpConn = (HttpURLConnection) this.url.openConnection();
+        int responseCode = httpConn.getResponseCode();
+        // always check HTTP response code first
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            // opens input stream from the HTTP connection
+            InputStream inputStream = httpConn.getInputStream();
+ 
+            String currentLine = "";
+            String content_file = etFile(inputStream);
+            
+            int endLinePos;
+            Map<String,Integer> regex = null;
+            boolean header = true;
+            
+            Map specie;
+            int count = 0;
+            while (content_file  != -1) {
+                endLinePos = 0;
+                do{
+                    endLinePos = temp.indexOf("\n");
+                    
+                    //We haven't finish the specie/line
+                    if(endLinePos == -1)
+                        currentLine += temp;
+                        
+                    else {
+                        currentLine += temp.substring(0, endLinePos);
+                        if(currentLine.contains("Malvastrum yellow vein C"))
+                                Log.d(endLinePos + " " + currentLine);
+                        //System.out.println(currentLine);
+                        
+                        if(header) {
+                            regex = parseHeader(currentLine);
+                            header = false;
+                        }
+                        else {
+                            count++;
+                            /*specie = parseLine(currentLine, regex);
+                            if(specie != null &&
+                               isToDo(oldSpecies, newSpecies, specie)) {
+                                ; //TODO create a thread
+                            }*/
+                        }
+
+                        currentLine = "";
+                        temp = temp.substring(endLinePos+1, temp.length());
+                    }
+                    
+                }while(endLinePos != -1);
+            }
+            Log.d(count);
+            inputStream.close();
+        } else {
+            Log.e("No file to download. Server replied HTTP code: " + responseCode);
+        }
+        httpConn.disconnect();
+
+        return newSpecies;
+    }
+    
+    private String getFile(InputStream is) {
+        Scanner s = new Scanner(is, "UTF-8").useDelimiter("\\A");
+        return s.hasNext() ? s.next() : "";
+    }
+    
+    private Map parseLine(String line, Map<String,Integer> regex) {
+        Map result = new HashMap();
+        Set replicons = new HashSet();
+        Matcher m = null;
+        String[] elements = line.split("\t");
+        String elt;
+        //If the speci avan't any replicons
+        if(elements.length <= regex.get("replicons") ||
+           elements[regex.get("replicons")].trim().isEmpty())
+            return null;
+        
+        
+        String[] replicons_brut = elements[regex.get("replicons")].split(";");
+        Pattern pattern_replicon = Pattern.compile("^[\\w]+:([\\w_\\-\\.]*)");
+        
+        for(int i = 0; i < replicons_brut.length; i++) {
+            elt = replicons_brut[i].trim();
+            m = pattern_replicon.matcher(elt);
+            
+            if(m.find())
+                replicons.add(m.group(1));
+                
+            //TODO improve that to get more
+            /*else if(!elt.isEmpty()) {
+                Log.d(elt);
+                replicons.add(elt);
+            }*/
+        }
+        
+        result.put("name", elements[regex.get("name")]);
+        
+        if(elements.length > regex.get("modify_date"))
+            result.put("modify_date", elements[regex.get("modify_date")]);
+        else
+            result.put("modify_date", "/");
+        
+        result.put("replicons", replicons);
+        
+        return result;
+    }
+    
+    private Map<String,Integer> parseHeader(String line) {
+        String[] elements = line.split("\t");
+        String elt;
+        Map<String,Integer> regex = new HashMap<String,Integer>();
+
+        for(int i = 0; i < elements.length; i++) {
+            elt = elements[i];
+            if(elt.contains("Name") || elt.contains("Organism"))
+                regex.put("name", i);
+            else if(elt.contains("Replicons") || 
+                     elt.contains("Segmemts")  || 
+                     elt.contains("Segments"))
+                regex.put("replicons", i);
+            else if(elt.contains("Modify Date"))
+                regex.put("modify_date", i);
+        }
+        
+        return regex;
+    }
+    
+    private boolean isToDo(JSONObject oldSpecies, 
+                             JSONObject newSpecies, 
+                             Map specie) {
+                             
+        String name = specie.get("name").toString();
+        String modify_date = specie.get("modify_date").toString();
+        
+        if(!oldSpecies.has(name)) {
+            newSpecies.put(name, modify_date);
+            return true;
+        }
+        else {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+            try{
+                Date oldDate = sdf.parse(oldSpecies.get(name).toString());
+                Date currentDate = sdf.parse(specie.get("modify_date").toString());
+            	
+            	if(currentDate.compareTo(oldDate)>0) {
+            	    newSpecies.put(specie.get("name").toString(), 
+                               specie.get("modify_date").toString());
+                    return true;
+                }
+            } catch(ParseException e) {}
+        }
+
+        return false;
+    }
+    
+    private void writeDoneFile(String text) {
+        File done = new File(this.root_path, "done.json");
+
+	    try{
+		    PrintWriter writer = new PrintWriter(done.getAbsolutePath(), "UTF-8");
+            writer.println(text);
+            writer.close();
+		} catch(IOException e){
+		    Log.e(e);
+	    }
+	}
 }
