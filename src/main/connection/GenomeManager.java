@@ -54,7 +54,10 @@ public class GenomeManager {
 		}
     }
     
-    public void AddSpeciesThreads() {//ExecutorService pool) {
+    public void AddSpeciesThreads(){//ExecutorService pool) {
+    	// TODO add species threads like this:
+		//es.execute(new SpeciesManager("foobar", new HashSet<String>(Arrays.asList("NC_003424.3")), es, listener));
+
         try{
             FileInputStream fis = new FileInputStream(this.list_species);
             byte[] data = new byte[(int) this.list_species.length()];
