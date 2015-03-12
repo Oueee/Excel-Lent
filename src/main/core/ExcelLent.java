@@ -7,8 +7,6 @@ import java.util.HashSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import connection.SpeciesManager;
-
 public class ExcelLent implements Runnable {
 
 	ThreadPoolExecutor es;
