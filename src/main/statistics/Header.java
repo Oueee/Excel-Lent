@@ -2,8 +2,9 @@ package statistics;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.List;
+
+import util.StringUtils;
 
 /**
  * Header for a CDS
@@ -53,117 +54,50 @@ public class Header {
 		// skip the ">"
 		reader.skip(1);
 
-		type = readUntil(reader, builder, '|');
-		code = readUntil(reader, builder, ' ');
-		
+		type = StringUtils.readUntil(reader, builder, '|');
+		code = StringUtils.readUntil(reader, builder, ' ');
+
 		// skip the ' [gene='
 		reader.skip(6);
 
-		gene = readUntil(reader, builder, ']');
-		
+		gene = StringUtils.readUntil(reader, builder, ']');
+
 		// skip the '] [protein='
 		reader.skip(10);
 
-		protein = readUntil(reader, builder, ']');
+		protein = StringUtils.readUntil(reader, builder, ']');
 
 		// skip the '] [protein_id='
 		reader.skip(13);
 
-		proteinID = readUntil(reader, builder, ']');
-		
+		proteinID = StringUtils.readUntil(reader, builder, ']');
+
 		// skip the '] [location='
 		reader.skip(11);
 
-		location = readUntil(reader, builder, ']');
+		location = StringUtils.readUntil(reader, builder, ']');
 
 		reader.close();
-		System.out.println("finished reading header");
 	}
 
 	/**
-	 * Reads from the StringReader and writes to a StringBuilder until an expected symbol comes
-	 * @param reader
-	 * @param builder Reset at the end of the method
-	 * @param expected
-	 * @return the subset of the string before the expected symbol
-	 * @throws IOException
-	 */
-	private String readUntil(StringReader reader, StringBuilder builder,
-			char expected) throws IOException {
-		int symbol = reader.read();
-
-		while ((char) symbol != expected) {
-			// reached the end of string before the expected symbol came. header
-			// is malformed!
-			if (symbol == -1) {
-				System.out.println("exceptoin");
-				throw new IOException();
-			}
-			
-			// everything ok
-			builder.append((char) symbol);
-			symbol = reader.read();
-		}
-		String result = builder.toString();
-		builder.setLength(0);
-		return result;
-	}
-
-	/**
-	 * Get the expected length of the corresponding CDS
+	 * Get the expected length of the corresponding CDS by summing the absolute
+	 * differences of the pairs in the location:
+	 * 
+	 * e.g. location=complement(1...50) -> sum = abs(1-50) + 1
+	 * location=complement(join(4...60),join(56..70)) -> sum = abs(4-60) + 1
+	 * abs(56-70) + 1
 	 * 
 	 * @return
 	 */
 	public int getExpectedCDSLength() {
-		List<Integer> list = new ArrayList<Integer>();
-
-		StringReader reader = new StringReader(this.getLocation());
-
-		StringBuilder builder = new StringBuilder();
-		int current;
-		char currentChar;
-		try {
-			while ((current = reader.read()) != -1) {
-				currentChar = (char) current;
-				switch (currentChar) {
-				case '0':
-				case '1':
-				case '2':
-				case '3':
-				case '4':
-				case '5':
-				case '6':
-				case '7':
-				case '8':
-				case '9':
-					// add to number
-					builder.append(currentChar);
-					break;
-				default:
-					// if a number has been built, save it
-					if (builder.length() != 0) {
-						list.add(Integer.parseInt(builder.toString()));
-						builder.setLength(0);
-					}
-					// ignore the char
-				}
-			}
-			// finish
-			if (builder.length() != 0) {
-				list.add(Integer.parseInt(builder.toString()));
-			}
-		} catch (NumberFormatException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		List<Integer> list = StringUtils.findNumbersInString(this.location);
 
 		if (list.size() % 2 != 0) {
-			System.out.println("List does not have an even number of elements"
-					+ list.toString());
+			throw new IllegalArgumentException(
+					"Method needs a list with an even number of elements");
 		}
 
-		// sum the expected lengths for each pair of elements.
 		int i = 0;
 		int sum = 0;
 		while (i < list.size()) {
@@ -172,7 +106,7 @@ public class Header {
 		}
 
 		return sum;
-	};
+	}
 
 	public String getType() {
 		return type;
@@ -202,5 +136,4 @@ public class Header {
 	public boolean isWellFormed() {
 		return wellFormed;
 	}
-
 }
