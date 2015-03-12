@@ -18,6 +18,10 @@ public class CDS {
 	// data array. Initially empty, then progressively filled by calls of the
 	// add method
 	private byte[] data;
+	private static final byte BASE_A = 65;
+	private static final byte BASE_C = 67;
+	private static final byte BASE_G = 71;
+	private static final byte BASE_T = 84;
 
 	// the position in the data array pointing to the next empty position in the
 	// data array, or its length, if it has been filled completely, or a value
@@ -83,16 +87,16 @@ public class CDS {
 		int i = 0;
 		outer: while (i < data.length) {
 			switch (data[i]) {
-			case 65:
+			case BASE_A:
 				freqA++;
 				break;
-			case 67:
+			case BASE_C:
 				freqC++;
 				break;
-			case 71:
+			case BASE_G:
 				freqG++;
 				break;
-			case 84:
+			case BASE_T:
 				freqT++;
 				break;
 			default:
