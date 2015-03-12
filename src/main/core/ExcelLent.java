@@ -2,12 +2,22 @@ package core;
 
 import gui.ProgressBarListener;
 
-import java.util.Arrays;
-import java.util.HashSet;
+import java.io.File;
+import java.io.FileInputStream;
+import java.net.URL;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import org.json.JSONObject;
+
+import util.Log;
+import connection.GenomeManager;
+
+
 public class ExcelLent implements Runnable {
+    private static GenomeManager virusesManager;
+    private static GenomeManager eukaryotesManager;
+    private static GenomeManager prokaryotesManager;
 
 	ThreadPoolExecutor es;
 	ProgressBarListener listener;
@@ -20,14 +30,47 @@ public class ExcelLent implements Runnable {
 	public void run() {
 		ThreadPoolExecutor es = (ThreadPoolExecutor) Executors
 				.newFixedThreadPool(10);
+	
+	    File project_root = new File(System.getProperty("user.dir"));
+	    File urls_path = new File(project_root.getParent(), "urls_lists.json");
+	    File tree_root = new File(project_root.getParent(), "tree");
+        
+        JSONObject urls = getUrls(urls_path);
 
-		// TODO just for testing
-		//int i = 0;
-		//while (i < 100) {
-			es.execute(new SpeciesManager("keineahnung", new HashSet<String>(
-					Arrays.asList("NC_003424.3")), es, listener));
-	//		i++;
-		//}
+        Log.i("Initializing the three genome manager");
+        
+        try{
+            virusesManager = new GenomeManager(new File(tree_root, "Viruses"),
+                                                new URL(urls.get("Viruses").toString()));
+            eukaryotesManager = new GenomeManager(new File(tree_root, "Eukaryotes"),
+                                                new URL(urls.get("Eukaryotes").toString()));
+            prokaryotesManager = new GenomeManager(new File(tree_root, "Prokaryote"),
+                                                new URL(urls.get("Prokaryote").toString()));
+        }catch(Exception e) {
+            Log.e(e);
+        }
+        
+        Log.i("Getting the lists and checking what to update");
+        virusesManager.AddSpeciesThreads();
+        eukaryotesManager.AddSpeciesThreads();
+        prokaryotesManager.AddSpeciesThreads();
+
 	}
+	
+	
+	private static JSONObject getUrls(File urls_path) {
+	    String urls = null;
+	    try{
+            FileInputStream fis = new FileInputStream(urls_path);
+            byte[] data = new byte[(int) urls_path.length()];
+            fis.read(data);
+            fis.close();
 
+            urls = new String(data, "UTF-8");
+        } catch(Exception e) {
+            Log.e(e);
+        }
+        
+        return (JSONObject) new JSONObject(urls).get("urls");
+	}
 }

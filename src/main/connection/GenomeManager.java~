@@ -1,0 +1,20 @@
+package main.connection;
+
+import java.util.EventListener;
+import java.io.File;
+import main.util.Log;
+
+/**
+ * Manages the species
+ * 
+ * Downloads the list of species and determines which have to be updated
+ */
+public class SpeciesManager {
+	
+	public SpeciesManager (String root_path) { //EventListener listener
+		Log.i(root_path);
+		//File dir = new File("C:\\user\\Desktop\\dir1\\dir2");
+        //dir.mkdirs();
+	}
+
+}
