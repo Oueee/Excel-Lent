@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.HashMap;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +38,10 @@ import core.SpeciesManager;
  * Manages the species
  * 
  * Downloads the list of species and determines which have to be updated
+ * Create the tree
+ * Delete a specie (todo) and update the statistics of his subgroup, group
+ * and kingdom
+ *
  */
 public class GenomeManager {
 	private File root_path;
@@ -126,20 +129,21 @@ public class GenomeManager {
                             header = false;
                         }
                         else {
-                            specie = parseLine(currentLine, regex);
+                            specie = parseIndividual(currentLine, regex);
                             if(specie != null &&
                                isToDo(oldSpecies, newSpecies, specie)) {
                                
                                String name = (String) specie.get("name");
                                Set<String> replicons = (Set<String>) specie.get("replicons");
+                               
                                SpeciesManager sm = new SpeciesManager(this.root_path,
                                                                       (String) specie.get("Group"),
                                                                       (String) specie.get("SubGroup"),
                                                                       (String) specie.get("name"),
                                                                       (Set<String>) specie.get("replicons"), 
                                                                       es, listener);
+                               
                                es.execute(sm);
-
                             }
                         }
 
@@ -160,14 +164,17 @@ public class GenomeManager {
                 specie_to_remove = (JSONObject) oldSpecies.get(name);
                 
                 /* TODO delete the specie and modify stats on all the path
+                 * i.e: kingdom, group and subgroup stats
                  *
-                 * path kingdom: this.root_path                         (File)
-                 * group = (String) specie_to_remove.get("Group")       (String)
+                 * Dir kingdom: this.root_path                          (File)
+                 * group = (String)specie_to_remove.get("Group")        (String)
                  * subGroup = (String)specie_to_remove.get("SubGroup")  (String)
                  * name = name                                          (String)
                  *
                  * to append a String at the File : new File(File, String)
                  * to append many String at a File: util.PathUtils.join(File, String...)
+                 *
+                 * if you have a question -> nicolas ;)
                  */
             }
 
@@ -179,8 +186,9 @@ public class GenomeManager {
         return newSpecies;
     }
 
-
-    private Map parseLine(String line, Map<String,Integer> regex) {
+    
+    //Function to parse a specie of the species list's file
+    private Map parseIndividual(String line, Map<String,Integer> regex) {
         Map result = new HashMap();
         Set<String> replicons = new HashSet<String>();
         Matcher m = null;
@@ -212,7 +220,7 @@ public class GenomeManager {
         return result;
     }
     
-    
+    //Function to parse the header of the species list file
     private Map<String,Integer> parseHeader(String line) {
         String[] elements = line.split("\t");
         String elt;
@@ -238,6 +246,13 @@ public class GenomeManager {
     }
     
     
+    /* Function to check if a specie is to update
+     *
+     *Side effects: 
+     * add the specie to the new updated list
+     * remove it from the old one (the species which is still in at the end 
+     * must be remove )
+     */
     private boolean isToDo(JSONObject oldSpecies, 
                              JSONObject newSpecies, 
                              Map specie) {
@@ -262,7 +277,7 @@ public class GenomeManager {
         
         newSpecies.put(name, specie_saved);
         
-        File path_specie = PathUtils.join(this.root_path, 
+        File path_specie = PathUtils.child(this.root_path, 
                                           (String)specie.get("Group"),
                                           (String)specie.get("SubGroup"),
                                           name);
@@ -292,6 +307,7 @@ public class GenomeManager {
         return toDo;
     }
     
+    //function to write the text in the species list file
     private void writeDoneFile(String text) {
         File done = new File(this.root_path, "done.json");
 

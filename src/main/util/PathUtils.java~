@@ -4,17 +4,15 @@ import java.lang.StringBuilder;
 import java.io.File;
 
 public class PathUtils {
-
     /**
-	 * Iterates over strings to get a grandchild of the base dir
-	 * basically, it just join the differents elements of the path and
-	 * create a new File
+	 * Iterates over strings to create a complete path from a base one
 	 * 
 	 * @param File
 	 * @param strings
 	 * @return File
 	 */
-    public static File child(final File base, final String ... pathElements)
+	 
+    public static File join(final File base, final String ... pathElements)
     {
         File result = null;
         
