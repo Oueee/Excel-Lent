@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.HashMap;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -24,9 +25,15 @@ import java.text.ParseException;
 import java.util.Scanner;
 import java.net.UnknownHostException;
 import java.util.Iterator;
-import util.Log;
+import java.util.concurrent.ThreadPoolExecutor;
+
+
 import org.json.JSONObject;
 import org.json.JSONArray;
+import util.Log;
+import util.PathUtils;
+import gui.ProgressBarListener;
+import core.SpeciesManager;
 
 /**
  * Manages the species
@@ -54,10 +61,8 @@ public class GenomeManager {
 		}
     }
     
-    public void AddSpeciesThreads(){//ExecutorService pool) {
-    	// TODO add species threads like this:
-		//es.execute(new SpeciesManager("foobar", new HashSet<String>(Arrays.asList("NC_003424.3")), es, listener));
-
+    public void AddSpeciesThreads(ThreadPoolExecutor es, 
+                                                ProgressBarListener listener){
         try{
             FileInputStream fis = new FileInputStream(this.list_species);
             byte[] data = new byte[(int) this.list_species.length()];
@@ -65,7 +70,7 @@ public class GenomeManager {
             fis.close();
             JSONObject oldSpecies = new JSONObject(new String(data, "UTF-8"));
             
-            JSONObject newSpecies = getSpecies(oldSpecies); // pool)
+            JSONObject newSpecies = getSpecies(oldSpecies, es, listener);
             writeDoneFile(newSpecies.toString(2));
             
         } catch(IOException e) {
@@ -73,7 +78,9 @@ public class GenomeManager {
         }
     }
     
-    private JSONObject getSpecies(JSONObject oldSpecies) throws IOException{ //ExecutorService pool)
+    private JSONObject getSpecies(JSONObject oldSpecies, ThreadPoolExecutor es,
+                              ProgressBarListener listener) throws IOException{
+                                                        
         JSONObject newSpecies = new JSONObject();
         HttpURLConnection httpConn = null;
         int responseCode = 0;
@@ -122,13 +129,17 @@ public class GenomeManager {
                             specie = parseLine(currentLine, regex);
                             if(specie != null &&
                                isToDo(oldSpecies, newSpecies, specie)) {
+                               
                                String name = (String) specie.get("name");
                                Set<String> replicons = (Set<String>) specie.get("replicons");
-                               
-                                /*TODO create a thread fot the specie
-                                 * get path and not name
-                                 * delete all replicons (one excel file per replicon)
-                                 */
+                               SpeciesManager sm = new SpeciesManager(this.root_path,
+                                                                      (String) specie.get("Group"),
+                                                                      (String) specie.get("SubGroup"),
+                                                                      (String) specie.get("name"),
+                                                                      (Set<String>) specie.get("replicons"), 
+                                                                      es, listener);
+                               es.execute(sm);
+
                             }
                         }
 
@@ -140,10 +151,25 @@ public class GenomeManager {
             }
             inputStream.close();
             
-            
+            Map<String,String> specie_to_remove;
+            String name;
             Iterator<String> itr = oldSpecies.keys();
-            while(itr.hasNext())
-                Log.d(itr.next()); //TODO delete the specie, name = itr.next()
+            
+            while(itr.hasNext()) {
+                name = itr.next();
+                specie_to_remove = (Map<String,String>) oldSpecies.get(name);
+                
+                /* TODO delete the specie and modify stats on all the path
+                 *
+                 * path kingdom: this.root_path                 (File)
+                 * group = specie_to_remove.get("Group")        (String)
+                 * subGroup = specie_to_remove.get("SubGroup")  (String)
+                 * name = name                                  (String)
+                 *
+                 * to append a String at the File : new File(File, String)
+                 * to append many String at a File: util.PathUtils.join(File, String...)
+                 */
+            }
 
         } else {
             Log.e("No file to download. Server replied HTTP code: " + responseCode);
@@ -153,7 +179,7 @@ public class GenomeManager {
         return newSpecies;
     }
 
-    //Create path with group, sub groups, and name of the specie
+
     private Map parseLine(String line, Map<String,Integer> regex) {
         Map result = new HashMap();
         Set<String> replicons = new HashSet<String>();
@@ -161,7 +187,7 @@ public class GenomeManager {
         String[] elements = line.split("\t");
         String elt;
         
-        //If the specie has not any replicons
+        //If the specie has any replicons
         if(elements.length <= regex.get("replicons") ||
            elements[regex.get("replicons")].trim().isEmpty())
             return null;
@@ -177,15 +203,16 @@ public class GenomeManager {
             if(m.find()) 
                 replicons.add(m.group(2));
         }
-
-        result.put("name", elements[regex.get("name")]);
-        result.put("modify_date", elements[regex.get("modify_date")]);
+        
+        for(Entry<String, Integer> entry : regex.entrySet())
+            result.put(entry.getKey(), elements[entry.getValue()]);
+            
         result.put("replicons", replicons);
         
         return result;
     }
     
-    //TODO get groups and subgroups
+    
     private Map<String,Integer> parseHeader(String line) {
         String[] elements = line.split("\t");
         String elt;
@@ -195,16 +222,21 @@ public class GenomeManager {
             elt = elements[i];
             if(elt.contains("Name") || elt.contains("Organism"))
                 regex.put("name", i);
-            else if(elt.contains("Replicons") || 
-                     elt.contains("Segmemts")  || 
-                     elt.contains("Segments"))
+            else if(elt.equals("Replicons") || 
+                     elt.equals("Segmemts")  || 
+                     elt.equals("Segments"))
                 regex.put("replicons", i);
-            else if(elt.contains("Modify Date"))
+            else if(elt.equals("Modify Date"))
                 regex.put("modify_date", i);
+            else if(elt.equals("Group"))
+                regex.put("Group", i);
+            else if(elt.equals("SubGroup"))
+                regex.put("SubGroup", i);
         }
         
         return regex;
     }
+    
     
     private boolean isToDo(JSONObject oldSpecies, 
                              JSONObject newSpecies, 
@@ -212,21 +244,42 @@ public class GenomeManager {
                              
         String name = specie.get("name").toString();
         String modify_date = specie.get("modify_date").toString();
+        String group= specie.get("Group").toString();
+        String subGroup = specie.get("SubGroup").toString();
+        
         boolean toDo = false;
         
+        Map<String,String> specie_saved = new HashMap<String,String>();
+        Map<String,String> old_specie;
+
         //If we have already done this specie
         if(newSpecies.has(name))
             return false;
-            
-        newSpecies.put(name, modify_date);
-                    
-        if(!oldSpecies.has(name))
+        
+        specie_saved.put("modify_date", modify_date);
+        specie_saved.put("group", group);
+        specie_saved.put("subGroup", subGroup);
+        
+        newSpecies.put(name, specie_saved);
+        
+        File path_specie = PathUtils.join(this.root_path, 
+                                          (String)specie.get("Group"),
+                                          (String)specie.get("SubGroup"),
+                                          name);
+        
+        if(!oldSpecies.has(name)) {
             toDo = true;
+            path_specie.mkdirs(); //Create the specie path
+        }
+        else if(!path_specie.exists()) {
+            Log.e("The specie path " + path_specie.getAbsolutePath() + 
+                  " doesn't exist anymore. However, we have already parse it");
+        }
         else {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
-            
+            old_specie = (Map<String,String>) oldSpecies.get(name);
             try{
-                Date oldDate = sdf.parse(oldSpecies.get(name).toString());
+                Date oldDate = sdf.parse(old_specie.get("modify_date"));
                 Date currentDate = sdf.parse(modify_date);
 
             	if(currentDate.compareTo(oldDate) > 0)
