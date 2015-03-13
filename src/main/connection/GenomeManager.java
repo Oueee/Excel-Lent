@@ -151,20 +151,20 @@ public class GenomeManager {
             }
             inputStream.close();
             
-            Map<String,String> specie_to_remove;
+            JSONObject specie_to_remove;
             String name;
             Iterator<String> itr = oldSpecies.keys();
             
             while(itr.hasNext()) {
                 name = itr.next();
-                specie_to_remove = (Map<String,String>) oldSpecies.get(name);
+                specie_to_remove = (JSONObject) oldSpecies.get(name);
                 
                 /* TODO delete the specie and modify stats on all the path
                  *
-                 * path kingdom: this.root_path                 (File)
-                 * group = specie_to_remove.get("Group")        (String)
-                 * subGroup = specie_to_remove.get("SubGroup")  (String)
-                 * name = name                                  (String)
+                 * path kingdom: this.root_path                         (File)
+                 * group = (String) specie_to_remove.get("Group")       (String)
+                 * subGroup = (String)specie_to_remove.get("SubGroup")  (String)
+                 * name = name                                          (String)
                  *
                  * to append a String at the File : new File(File, String)
                  * to append many String at a File: util.PathUtils.join(File, String...)
@@ -250,7 +250,7 @@ public class GenomeManager {
         boolean toDo = false;
         
         Map<String,String> specie_saved = new HashMap<String,String>();
-        Map<String,String> old_specie;
+        JSONObject old_specie;
 
         //If we have already done this specie
         if(newSpecies.has(name))
@@ -277,9 +277,9 @@ public class GenomeManager {
         }
         else {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
-            old_specie = (Map<String,String>) oldSpecies.get(name);
+            old_specie = (JSONObject) oldSpecies.get(name);
             try{
-                Date oldDate = sdf.parse(old_specie.get("modify_date"));
+                Date oldDate = sdf.parse((String)old_specie.get("modify_date"));
                 Date currentDate = sdf.parse(modify_date);
 
             	if(currentDate.compareTo(oldDate) > 0)
