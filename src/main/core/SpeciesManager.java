@@ -53,7 +53,7 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 		for (String repliconID : repliconIDs) {
 			// TODO this method will probably return a list of analysis results.
 			// do something fancy with the results
-			//connector.downloadAndAnalyseReplicon(repliconID);
+			connector.downloadAndAnalyseReplicon(repliconID);
 		}
 
 		return null;
