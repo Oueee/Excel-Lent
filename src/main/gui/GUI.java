@@ -1,9 +1,12 @@
 package gui;
 
+import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.util.concurrent.FutureTask;
 
 import javax.swing.AbstractAction;
@@ -11,6 +14,8 @@ import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuBar;
+import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -27,13 +32,20 @@ public class GUI {
         //Create and set up the window.
         JFrame frame = new JFrame("Excel-Lent");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
- 
+        
+		JMenuBar menuBar = new JMenuBar();
+		GraphicsEnvironment env =
+        GraphicsEnvironment.getLocalGraphicsEnvironment();
+    	frame.setExtendedState(frame.getExtendedState() | frame.MAXIMIZED_BOTH);
+        
+        
         JLabel label = new JLabel("DO NOT press the button below", JLabel.CENTER);
         
         final JProgressBar progressBar = new JProgressBar(0, 100);
         final ExcelLent excellent = new ExcelLent(new ProgressBarListener(progressBar));
 
-        
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout());
 		JButton button = new JButton(new AbstractAction("Run") {
 			public void actionPerformed(ActionEvent e) {
 				new Thread(excellent).start();
@@ -46,17 +58,24 @@ public class GUI {
         button.setMnemonic(KeyEvent.VK_ENTER);
         button.setActionCommand("run");
   
+        
         GridLayout grid = new GridLayout(0, 1, 10, 10);
+        JPanel panelGrid = new JPanel();
         
-        Container c = frame.getContentPane();
-
-        c.setLayout(grid);
+        panelGrid.setLayout(grid);
         
-        c.add(label);
-        c.add(button);
-        c.add(progressBar);
+        panelGrid.add(label);
+        panelGrid.add(button);
+        panelGrid.add(progressBar);
+        panel.add(panelGrid, BorderLayout.CENTER);
+        File rep = new File(System.getProperty("user.dir")+"\\tree");
         
+        Explorer explore =  new Explorer(rep.listFiles());
         
+        panel.add(explore, BorderLayout.WEST);
+        
+        frame.setContentPane(panel);
+        frame.setSize(1000,500);
         //Display the window.
         frame.pack();
         //frame.setSize(500, 300);
