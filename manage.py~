@@ -12,7 +12,7 @@ dirs_to_clean = ['bin', 'docs', 'tree']
 
 ### compile parts
 def make():
-    call(['javac -d bin -sourcepath src/main src/main/core/ExcelLent.java'], shell=True)
+    call(['javac -d bin -sourcepath src/main src/main/gui/GUI.java'], shell=True)
 
 ### configure parts
 def configure():
@@ -29,7 +29,7 @@ def doc():
 ### run parts
 def run():
     os.chdir('bin')
-    call(['java core.ExcelLent'], shell=True)
+    call(['java gui.GUI'], shell=True)
 
 
 ### clean parts

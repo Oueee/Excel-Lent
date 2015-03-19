@@ -33,9 +33,20 @@ public class ExcelLent implements Runnable {
 				.newFixedThreadPool(10);
 	    
 	    File project_root = new File(System.getProperty("user.dir"));
-	    File urls_path = new File(project_root.getParent(), "urls_lists.json");
-	    File tree_root = new File(project_root.getParent(), "tree");
+
+	    File urls_path = new File(project_root, "urls_lists.json");
+	    File tree_root = new File(project_root, "tree");
         
+        if(!urls_path.exists())
+            Log.e("Doesn't find urls_lists.json file." + 
+            " Maybe you have to run the application from the " +
+            "root directory of the project.");
+        
+        if(!tree_root.exists() || !tree_root.isDirectory())
+            Log.e("Doesn't root of the genome tree." + 
+            " Maybe you have to the application from the " +
+            "root directory of the project.");
+            
         JSONObject urls = getUrls(urls_path);
 
         Log.i("Initializing genomes managers");

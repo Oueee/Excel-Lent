@@ -28,8 +28,7 @@ def doc():
 
 ### run parts
 def run():
-    os.chdir('bin')
-    call(['java gui.GUI'], shell=True)
+    call(['java -classpath bin gui.GUI'], shell=True)
 
 
 ### clean parts
