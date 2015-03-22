@@ -166,6 +166,13 @@ public class Header {
                 return this.wellFormed;
             }
         }
+        // check if the lenght is != %3 then elimination
+        if (this.getExpectedCDSLength()%3 != 0)
+        {
+            this.wellFormed = false;
+            return this.wellFormed;
+        }
+        
         
         this.wellFormed = true;
         return this.wellFormed;
