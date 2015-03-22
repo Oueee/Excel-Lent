@@ -112,9 +112,10 @@ public class CDS {
 	/**
 	 * This method returns true if the CDS has been filled with exactly the
 	 * amount of data that was expected according to its header
-	 * 
+	 * => This amount of data prove that all data have been found
+     * 
 	 * TODO better checks, such as START and STOP codons
-	 * 
+     * 
 	 * @return
 	 */
 	public boolean isCompleteAndCorrect() {
