@@ -29,7 +29,7 @@ public class Connector {
 	 * @throws IOException
 	 */
 	public void downloadAndAnalyseReplicon(String repliconID) throws IOException {
-		String urlString = URL_PREFIX + "NC_003424.3" + URL_SUFFIX;
+		String urlString = URL_PREFIX + repliconID + URL_SUFFIX;
 		URL url = new URL(urlString);
 		HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
 		int responseCode = httpConn.getResponseCode();
