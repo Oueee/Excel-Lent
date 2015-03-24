@@ -114,18 +114,18 @@ public class CDS {
      **/
     public void analyse_trinucleotide()
     {
-        int len = data.length
-        int phase = 0
+        int len = data.length;
+        int phase = 0;
         //in the loop we start in the last elem of the phase 0 and we decrease 
-        for(i = len-1; i >= 3; i++)
+        for(int i = len-1; i >= 3; i++)
         {
-            //create the trinucleotide
-            String trinucleotide = data[i-2].concat(data[i-1]).concat(data[i])
+            //create the trinucleotide :simplification of real it's byte and not letter
+            int trinucleotide = data[i-2] + data[i-1] + data[i];
             // add one in the array/hashtable/object of the phase 
             // "phase" and the trinucleotide "trinucleotide"
             
             //changing of phase
-            phase = (phase+1)%3
+            phase = (phase+1)%3;
         }
     }
 
