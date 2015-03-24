@@ -63,7 +63,6 @@ public class CDS {
 				// being added
 				dataPointer = data.length + 1;
 			}
-
 		}
 		reader.close();
 	}
@@ -139,7 +138,51 @@ public class CDS {
 	 * @return
 	 */
 	public boolean isCompleteAndCorrect() {
-		return (dataPointer == data.length);
+		boolean ret = true;
+        boolean loop;
+        //check if its the good length
+        if (dataPointer != data.length)
+            ret = false;
+        //get the end and the begin data
+        byte [] end = {data[data.length-3], data[data.length-2], data[data.length-1]};
+        byte [] begin = {data[0], data[1], data[2]};
+        //fill the start and end codons
+        byte [][] start = {{BASE_A, BASE_T, BASE_G},
+                            {BASE_C, BASE_T, BASE_G},
+                            {BASE_T, BASE_T, BASE_G}, 
+                            {BASE_G, BASE_T, BASE_G}, 
+                            {BASE_A, BASE_T, BASE_A},
+                            {BASE_A, BASE_T, BASE_C},
+                            {BASE_A, BASE_T, BASE_T},
+                            {BASE_T, BASE_T, BASE_A}};
+        byte [][] stop = {{BASE_T, BASE_A, BASE_A}, 
+                           {BASE_T, BASE_A, BASE_G},
+                           {BASE_T, BASE_G, BASE_A}};
+        //check if the end is a stop codon
+        loop = false;
+        for(byte [] stopelem : stop)
+        {
+            if (end.equals(stopelem))
+            {
+                loop = true;
+                break;
+            }
+        }
+        if (loop == false)
+            ret = false;
+        // check if the begining is a start codon
+        loop = false;
+        for(byte [] startelem : start)
+        {
+            if (begin.equals(startelem))
+            {
+                loop = true;
+                break;
+            }
+        }
+        if (loop == false)
+            ret = false;
+        return ret;
 	}
 
 }
