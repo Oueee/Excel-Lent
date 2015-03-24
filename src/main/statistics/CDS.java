@@ -108,6 +108,26 @@ public class CDS {
 		System.out.println("Frequencies of characters: A: " + freqA + ", C: "
 				+ freqC + ", G: " + freqG + ", T: " + freqT);
 	}
+    
+    /** This method compute all trinucleotide occurence in each phase
+     * based on the data array
+     **/
+    public void analyse_trinucleotide()
+    {
+        int len = data.length
+        int phase = 0
+        //in the loop we start in the last elem of the phase 0 and we decrease 
+        for(i = len-1; i >= 3; i++)
+        {
+            //create the trinucleotide
+            String trinucleotide = data[i-2].concat(data[i-1]).concat(data[i])
+            // add one in the array/hashtable/object of the phase 
+            // "phase" and the trinucleotide "trinucleotide"
+            
+            //changing of phase
+            phase = (phase+1)%3
+        }
+    }
 
 	/**
 	 * This method returns true if the CDS has been filled with exactly the
