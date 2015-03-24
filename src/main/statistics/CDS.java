@@ -116,10 +116,10 @@ public class CDS {
         int len = data.length;
         int phase = 0;
         //in the loop we start in the last elem of the phase 0 and we decrease 
-        for(int i = len-1; i >= 3; i++)
+        for(int i = 0; i <= len-4; i++)
         {
             //create the trinucleotide :simplification of real it's byte and not letter
-            int trinucleotide = data[i-2] + data[i-1] + data[i];
+            byte [] trinucleotide = {data[i], data[i+1], data[i+2]};
             // add one in the array/hashtable/object of the phase 
             // "phase" and the trinucleotide "trinucleotide"
             
