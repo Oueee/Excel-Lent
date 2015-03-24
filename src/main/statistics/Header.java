@@ -145,7 +145,7 @@ public class Header {
     **/
 	public boolean isWellFormed() {
         //check if the form math
-        Pattern pattern = Pattern.compile("^(complement\\((\\d+\\.\\.\\d+,)*(\\d+\\.\\.\\d+)\\)|complement\\(join\\((\\d+\\.\\.\\d+,)*(\\d+\\.\\.\\d+)\\)\\))$");
+        Pattern pattern = Pattern.compile("^(complement\\((\\d+\\.\\.\\d+)\\)|complement\\(join\\((\\d+\\.\\.\\d+,)*(\\d+\\.\\.\\d+)\\)\\))$");
         Matcher matcher = pattern.matcher(this.location);
         boolean match = matcher.matches();
         if (match == false)
