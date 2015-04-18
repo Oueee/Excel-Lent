@@ -5,6 +5,7 @@ import gui.ProgressBarListener;
 import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.io.File;
+import java.util.Map;
 
 import javax.swing.SwingWorker;
 
@@ -20,7 +21,7 @@ import connection.Connector;
 public class SpeciesManager extends SwingWorker<Void, Void> {
 	// informations about the species
 	private File kingdomDir;
-	private String groupName;
+	private Map specieInfos;
 	private String subGroupName;
 	private String speciesName;
 	private Set<String> repliconIDs;
@@ -29,22 +30,28 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 	private ThreadPoolExecutor es;
 	private ProgressBarListener listener;
 
-	public SpeciesManager(File kingdom, String group, String subGroup, 
-	            String name, Set<String> repliconIDs,
+	public SpeciesManager(File kingdom, Map specie,
 			    ThreadPoolExecutor es, ProgressBarListener listener) {
 		
 		this.kingdomDir = kingdom;
-		this.groupName = group;
-		this.subGroupName = subGroup;
-		this.speciesName = name;
-		this.repliconIDs = repliconIDs;
+		this.specieInfos = specie;
 		this.es = es;
 		this.listener = listener;
 		
 		/* Tips: 
-         * to append a String at the File : new File(File, String)
-         * to append many String at a File: util.PathUtils.join(File, String...)
+         * to get a children of FILE, append a String at the File : new File(File, String)
+         * to get a descendant, append many String at a File: util.PathUtils.join(File, String...)
          */
+         
+         /*
+          * kingdomDir (aboslute path)
+          * specieInfos (Map):
+          *      name        (String)
+          *      replicons   (Set<String>)
+          *      modify_date (String)
+          *      group       (String)
+          *      subGroup    (String)
+          */
 	}
 
 	@Override

@@ -3,6 +3,8 @@ package statistics;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
+import java.util.regex.*;
+
 
 import util.StringUtils;
 
@@ -25,7 +27,7 @@ public class Header {
 	public Header(String line) {
 		try {
 			this.parseHeader(line);
-			wellFormed = true;
+			this.isWellFormed();
 		} catch (IOException e) {
 			// header malformed
 			wellFormed = false;
@@ -133,7 +135,46 @@ public class Header {
 	}
 
 	// TODO possibly do more checks
+    /** Check is the location is well formed 
+     * it should be something like : complement(join(2..34,42..4200))
+     * /!\ Only one complement and one join and .. to separate two number
+     * in the string a..b,c..d  a < b, b < c, c < d
+     * 
+     * change wellFormed of the class
+     * @return a boolean showing if the string is well formed or not
+    **/
 	public boolean isWellFormed() {
-		return wellFormed;
+        //check if the form math
+        Pattern pattern = Pattern.compile("^(complement\\((\\d+\\.\\.\\d+)\\)|complement\\(join\\((\\d+\\.\\.\\d+,)*(\\d+\\.\\.\\d+)\\)\\))$");
+        Matcher matcher = pattern.matcher(this.location);
+        boolean match = matcher.matches();
+        if (match == false)
+        {
+            this.wellFormed = false;
+            return this.wellFormed;
+        } 
+        //check if the number are in the right order
+        List<Integer> list = StringUtils.findNumbersInString(this.location);
+        int last = -1;
+        for (int elem: list)
+        {
+            if (last < elem)
+                last = elem;
+            else
+            {
+                this.wellFormed = false;
+                return this.wellFormed;
+            }
+        }
+        // check if the lenght is != %3 then elimination
+        if (this.getExpectedCDSLength()%3 != 0)
+        {
+            this.wellFormed = false;
+            return this.wellFormed;
+        }
+        
+        
+        this.wellFormed = true;
+        return this.wellFormed;
 	}
 }

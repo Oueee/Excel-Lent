@@ -12,6 +12,8 @@ dirs_to_clean = ['bin', 'docs', 'tree']
 
 ### compile parts
 def make():
+    if not path.exists(path.join(".", "bin")):
+        os.mkdir("bin")
     call(['javac -d bin -sourcepath src/main src/main/gui/GUI.java'], shell=True)
 
 ### configure parts

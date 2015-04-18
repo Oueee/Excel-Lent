@@ -63,7 +63,6 @@ public class CDS {
 				// being added
 				dataPointer = data.length + 1;
 			}
-
 		}
 		reader.close();
 	}
@@ -108,17 +107,82 @@ public class CDS {
 		System.out.println("Frequencies of characters: A: " + freqA + ", C: "
 				+ freqC + ", G: " + freqG + ", T: " + freqT);
 	}
+    
+    /** This method compute all trinucleotide occurence in each phase
+     * based on the data array
+     **/
+    public void analyse_trinucleotide()
+    {
+        int len = data.length;
+        int phase = 0;
+        //in the loop we start in the last elem of the phase 0 and we decrease 
+        for(int i = 0; i <= len-4; i++)
+        {
+            //create the trinucleotide :simplification of real it's byte and not letter
+            byte [] trinucleotide = {data[i], data[i+1], data[i+2]};
+            // add one in the array/hashtable/object of the phase 
+            // "phase" and the trinucleotide "trinucleotide"
+            
+            //changing of phase
+            phase = (phase+1)%3;
+        }
+    }
 
 	/**
 	 * This method returns true if the CDS has been filled with exactly the
 	 * amount of data that was expected according to its header
-	 * 
+	 * => This amount of data prove that all data have been found
+     * 
 	 * TODO better checks, such as START and STOP codons
-	 * 
+     * 
 	 * @return
 	 */
 	public boolean isCompleteAndCorrect() {
-		return (dataPointer == data.length);
+		boolean ret = true;
+        boolean loop;
+        //check if its the good length
+        if (dataPointer != data.length)
+            ret = false;
+        //get the end and the begin data
+        byte [] end = {data[data.length-3], data[data.length-2], data[data.length-1]};
+        byte [] begin = {data[0], data[1], data[2]};
+        //fill the start and end codons
+        byte [][] start = {{BASE_A, BASE_T, BASE_G},
+                            {BASE_C, BASE_T, BASE_G},
+                            {BASE_T, BASE_T, BASE_G}, 
+                            {BASE_G, BASE_T, BASE_G}, 
+                            {BASE_A, BASE_T, BASE_A},
+                            {BASE_A, BASE_T, BASE_C},
+                            {BASE_A, BASE_T, BASE_T},
+                            {BASE_T, BASE_T, BASE_A}};
+        byte [][] stop = {{BASE_T, BASE_A, BASE_A}, 
+                           {BASE_T, BASE_A, BASE_G},
+                           {BASE_T, BASE_G, BASE_A}};
+        //check if the end is a stop codon
+        loop = false;
+        for(byte [] stopelem : stop)
+        {
+            if (end.equals(stopelem))
+            {
+                loop = true;
+                break;
+            }
+        }
+        if (loop == false)
+            ret = false;
+        // check if the begining is a start codon
+        loop = false;
+        for(byte [] startelem : start)
+        {
+            if (begin.equals(startelem))
+            {
+                loop = true;
+                break;
+            }
+        }
+        if (loop == false)
+            ret = false;
+        return ret;
 	}
 
 }

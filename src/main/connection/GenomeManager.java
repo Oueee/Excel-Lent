@@ -137,10 +137,7 @@ public class GenomeManager {
                                Set<String> replicons = (Set<String>) specie.get("replicons");
                                
                                SpeciesManager sm = new SpeciesManager(this.root_path,
-                                                                      (String) specie.get("Group"),
-                                                                      (String) specie.get("SubGroup"),
-                                                                      (String) specie.get("name"),
-                                                                      (Set<String>) specie.get("replicons"), 
+                                                                      specie, 
                                                                       es, listener);
                                
                                es.execute(sm);
@@ -237,9 +234,9 @@ public class GenomeManager {
             else if(elt.equals("Modify Date"))
                 regex.put("modify_date", i);
             else if(elt.equals("Group"))
-                regex.put("Group", i);
+                regex.put("group", i);
             else if(elt.equals("SubGroup"))
-                regex.put("SubGroup", i);
+                regex.put("subGroup", i);
         }
         
         return regex;
