@@ -182,6 +182,21 @@ public class CDS {
         }
         if (loop == false)
             ret = false;
+        // check if all char are A C T G
+        loop = true;
+        for(byte elem : data)
+        {
+            switch(elem)
+            {
+                case BASE_A: break;
+                case BASE_T: break;
+                case BASE_G: break;
+                case BASE_C: break;
+                default: loop = false;
+            }
+        }
+        if (loop == false)
+            ret = false;
         return ret;
 	}
 
