@@ -2,6 +2,7 @@ package gui;
 
 import java.awt.Dimension;
 import java.io.File;
+
 import javax.swing.*;
 import javax.swing.tree.*;
 
@@ -13,8 +14,8 @@ public class Explorer extends JPanel
 	public Explorer()
 	{
 		//on recupère les lecteurs
-		_roots = File.listRoots();
-		generation();
+		//_roots = File.listRoots();
+		//generation();
 	}
 	
 	public Explorer( File[] debut)
@@ -23,7 +24,14 @@ public class Explorer extends JPanel
 		_roots = debut;
 		generation();
 	}
-	
+	public void refreshTree(String path)
+	{
+		File rep = new File(path);
+		this._roots = rep.listFiles();
+		this.removeAll();
+		this.generation();
+		
+	}
 	private void generation()
 	{
 		// taille de la fenetre
