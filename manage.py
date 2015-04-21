@@ -13,7 +13,6 @@ attributs = {
     'main_class': 'gui.GUI',
 }
 
-### Options
 ### compile parts
 def build(self):
     if not os.path.exists(os.path.join(".", "bin")):
