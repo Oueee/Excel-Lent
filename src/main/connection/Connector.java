@@ -10,6 +10,7 @@ import java.net.URL;
 import statistics.AnalysisResults;
 import statistics.CDS;
 import statistics.Header;
+import util.Log;
 
 /**
  * Manages the internet connection
@@ -25,7 +26,7 @@ public class Connector {
 
 	/**
 	 * Downloads replicon data from the internet.
-	 * 
+	 *
 	 * As some data sets can be huge, the results are analysed per CDS and not per replicon
 	 * TODO Therefore, this method should probably return the results of the analysis
 	 * @param repliconID
@@ -36,7 +37,7 @@ public class Connector {
 		URL url = new URL(urlString);
 		HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
 		int responseCode = httpConn.getResponseCode();
-		
+
 		// always check HTTP response code first
 		if (responseCode == HttpURLConnection.HTTP_OK) {
 			// opens input stream from the HTTP connection
@@ -97,8 +98,7 @@ public class Connector {
 			}
 			reader.close();
 		} else {
-			// Log.e("No file to download. Server replied HTTP code: " +
-			// responseCode);
+			Log.e("No file to download. Server replied HTTP code: " + responseCode);
 		}
 		httpConn.disconnect();
 		
@@ -109,5 +109,4 @@ public class Connector {
 
 	}
 
-	
 }
