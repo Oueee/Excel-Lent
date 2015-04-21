@@ -1,74 +1,35 @@
-import os
-from os import path
+"""Module manage.
+
+"""
+
 import sys
-from subprocess import call, Popen
-import shutil
-import inspect
+import os
+import subprocess
+import launcher
+import shutil 
+
+attributs = {
+    'flags': '-g',# -Xlint:all',
+    'main_class': 'gui.GUI',
+}
 
 ### Options
 ### compile parts
-def make():
-    if not path.exists(path.join(".", "bin")):
+def build(self):
+    if not os.path.exists(os.path.join(".", "bin")):
         os.mkdir("bin")
-    call(['javac -d bin -sourcepath src/main src/main/gui/GUI.java'], shell=True)
-
-### configure parts
-def configure():
-    print('hello')
-
-### test & analysze parts
-def test():
-    print('hello')
-
-### doc parts
-def doc():
-    print('hello')
+    subprocess.call(['javac -d bin -sourcepath src/main src/main/gui/GUI.java'], shell=True)
 
 ### run parts
-def run():
-    call(['java -classpath bin gui.GUI'], shell=True)
+def run(self):
+    subprocess.call(['java -classpath bin gui.GUI'], shell=True)
 
+def clean(self):
+    """clean the java project"""
 
-### clean parts
-def clean():
-    root_project = path.dirname(path.abspath(inspect.getsourcefile(clean)))
+    self._clean(os.path.join('bin', '*'),
+                os.path.join('tree', '*'))
 
-    for dir_to_clean in dirs_to_clean:
-        rm_dir(path.join(root_project, dir_to_clean))
+    self._clean_rec('*~')
 
-
-def rm_dir(path):
-    for root, dirs, files in os.walk(path):
-        for f in files:
-            os.unlink(os.path.join(root, f))
-        for d in dirs:
-            shutil.rmtree(os.path.join(root, d))
-
-
-### The operations
-operations = {
-    'make' :        (make, '\t\tcompile the software'),
-    'configure':    (configure, '\tconfigure it to adapt it at the architecture'),
-    'test':         (test, '\t\trun the unit test and integration test'),
-    'doc':          (doc, '\t\tcreate the doc'),
-    'run':          (run, '\t\texecute the software'),
-    'clean':        (clean, '\t\tclean the project'),
-}
-
-
-if __name__ == "__main__":
-    opt = ['make', 'run']
-
-    if len(sys.argv) > 1:
-        opt = sys.argv[1:]
-
-    if 'help' in opt:
-        for cmd_name, (stage, help) in operations.items():
-            print(cmd_name + ': ' + help)
-    else:
-        for stage in opt:
-            if not stage in operations:
-                print('The operation ' + stage + ' doesn\'t exists')
-            else:
-                current_stage = operations[stage][0]
-                current_stage()
+launcher.main()
