@@ -6,10 +6,6 @@ import shutil
 import inspect
 
 ### Options
-dirs_to_clean = ['bin', 'docs', 'tree']
-
-
-
 ### compile parts
 def make():
     if not path.exists(path.join(".", "bin")):
@@ -36,7 +32,7 @@ def run():
 ### clean parts
 def clean():
     root_project = path.dirname(path.abspath(inspect.getsourcefile(clean)))
-    
+
     for dir_to_clean in dirs_to_clean:
         rm_dir(path.join(root_project, dir_to_clean))
 
@@ -47,7 +43,7 @@ def rm_dir(path):
             os.unlink(os.path.join(root, f))
         for d in dirs:
             shutil.rmtree(os.path.join(root, d))
-            
+
 
 ### The operations
 operations = {
@@ -62,10 +58,10 @@ operations = {
 
 if __name__ == "__main__":
     opt = ['make', 'run']
-    
+
     if len(sys.argv) > 1:
         opt = sys.argv[1:]
-    
+
     if 'help' in opt:
         for cmd_name, (stage, help) in operations.items():
             print(cmd_name + ': ' + help)
