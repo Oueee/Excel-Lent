@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import statistics.AnalysisResults;
 import statistics.CDS;
 import statistics.Header;
 
@@ -19,6 +20,8 @@ public class Connector {
 
 	private static final String URL_PREFIX = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=";
 	private static final String URL_SUFFIX = "&rettype=fasta_cds_na&retmode=text";
+	
+	private AnalysisResults results = new AnalysisResults();
 
 	/**
 	 * Downloads replicon data from the internet.
@@ -46,21 +49,20 @@ public class Connector {
 			Header currentHeader;
 			CDS currentCDS = null;
 			while ((line = reader.readLine()) != null) {
-				// System.out.println("reading line " + line);
-				if (ignoring)
-					continue;
 
 				// check if header
 				if (line.startsWith(">")) {
 					// line is header
 					// last CDS has ended, so process it
-					if (currentCDS != null)
-
-						// TODO instead, the method analyse will probably return
-						// some analysis result, which can be added to a list
-						// and returned by this method
-						currentCDS.analyse();
-
+					if (currentCDS != null) {
+						boolean correct = currentCDS.isCompleteAndCorrect();
+						if (correct) {
+							results.update(currentCDS);
+						} else {
+							System.out.println("Encountered bad CDS");
+							results.foundBadCDS();
+						}
+					}
 					// analyse new header
 					currentHeader = new Header(line);
 					if (currentHeader.isWellFormed()) {
@@ -72,9 +74,23 @@ public class Connector {
 					} else {
 						// header bad. ignore CDS until next header
 						ignoring = true;
+						results.foundBadCDS();
+						System.out.println("Encountered malformed header");
+					}
+				} else if (line.equals("")) {
+					// last line reached; process CDS
+					boolean correct = currentCDS.isCompleteAndCorrect();
+					if (correct) {
+						results.update(currentCDS);
+					} else {
+						System.out.println("Encountered bad CDS");
+						results.foundBadCDS();
 					}
 				} else {
-					// this is part of a CDS
+					if (ignoring) {
+						continue;
+					}
+
 					currentCDS.add(line);
 				}
 
@@ -85,7 +101,13 @@ public class Connector {
 			// responseCode);
 		}
 		httpConn.disconnect();
+		
+		// TODO save to Excel
+		
+		// print everything
+		System.out.println(results);
 
 	}
+
 	
 }

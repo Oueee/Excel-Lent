@@ -145,14 +145,16 @@ public class Header {
     **/
 	public boolean isWellFormed() {
         //check if the form math
+		/* TODO does not work e.g. it says that the following is malformed: >lcl|NC_021245.1_cds_YP_008003511.1_1 [gene=AV2] [protein=pre-coat protein] [protein_id=YP_008003511.1] [location=133..483]
         Pattern pattern = Pattern.compile("^(complement\\((\\d+\\.\\.\\d+)\\)|complement\\(join\\((\\d+\\.\\.\\d+,)*(\\d+\\.\\.\\d+)\\)\\))$");
         Matcher matcher = pattern.matcher(this.location);
         boolean match = matcher.matches();
         if (match == false)
         {
+        	System.out.println("No match for header pattern");
             this.wellFormed = false;
             return this.wellFormed;
-        } 
+        } */
         //check if the number are in the right order
         List<Integer> list = StringUtils.findNumbersInString(this.location);
         int last = -1;
