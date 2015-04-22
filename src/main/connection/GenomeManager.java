@@ -271,9 +271,6 @@ public class GenomeManager {
             return false;
 
         specie_saved.put("modify_date", modify_date);
-        specie_saved.put("group", group);
-        specie_saved.put("subGroup", subGroup);
-
         newSpecies.put(name, specie_saved);
 
         File path_specie = PathUtils.child(this.root_path,
@@ -281,10 +278,15 @@ public class GenomeManager {
                                           (String)specie.get("subGroup"),
                                           name);
 
+				File path_replicon;
+
         if(!oldSpecies.has(name)) {
-            toDo = true;
+						for(String replicon : (Set<String>)specie.get("replicons")) {
+							path_replicon = new File(path_specie, replicon);
+							path_replicon.mkdirs();
+						}
 						SpeciesManager.toDo(this.root_path, specie);
-            path_specie.mkdirs(); //Create the specie path
+						toDo = true;
         }
         else if(!path_specie.exists()) {
             Log.e("The specie path " + path_specie.getAbsolutePath() +

@@ -6,7 +6,7 @@ import sys
 import os
 import subprocess
 import launcher
-import shutil 
+import shutil
 
 attributs = {
     'flags': '-g',# -Xlint:all',
@@ -15,13 +15,20 @@ attributs = {
 
 ### compile parts
 def build(self):
-    if not os.path.exists(os.path.join(".", "bin")):
-        os.mkdir("bin")
-    subprocess.call(['javac -d bin -sourcepath src/main src/main/gui/GUI.java'], shell=True)
+    files_path = os.path.join('src', 'main')
+    main_class = self.main_class.replace('.', os.sep) + '.java'
+
+    cmd = '{} -d bin -sourcepath {} -cp "lib/poi-3.11/*" {} {}'.format(
+            self.compilo, files_path,
+            os.path.join(files_path, main_class), self.flags)
+
+    subprocess.call(cmd, shell=True)
+
 
 ### run parts
 def run(self):
-    subprocess.call(['java -classpath bin gui.GUI'], shell=True)
+    subprocess.call(['java -classpath bin {}'.format(self.main_class)], shell=True)
+
 
 def clean(self):
     """clean the java project"""

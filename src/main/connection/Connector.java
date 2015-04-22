@@ -21,7 +21,7 @@ public class Connector {
 
 	private static final String URL_PREFIX = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=";
 	private static final String URL_SUFFIX = "&rettype=fasta_cds_na&retmode=text";
-	
+
 	private AnalysisResults results = new AnalysisResults();
 
 	/**
@@ -32,7 +32,7 @@ public class Connector {
 	 * @param repliconID
 	 * @throws IOException
 	 */
-	public void downloadAndAnalyseReplicon(String repliconID) throws IOException {
+	public AnalysisResults downloadAndAnalyseReplicon(String repliconID) throws IOException {
 		String urlString = URL_PREFIX + repliconID + URL_SUFFIX;
 		URL url = new URL(urlString);
 		HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
@@ -101,12 +101,12 @@ public class Connector {
 			Log.e("No file to download. Server replied HTTP code: " + responseCode);
 		}
 		httpConn.disconnect();
-		
-		// TODO save to Excel
-		
-		// print everything
-		System.out.println(results);
 
+		// TODO save to Excel
+
+		// print everything
+		//System.out.println(results);
+		return results;
 	}
 
 }

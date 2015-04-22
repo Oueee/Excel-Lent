@@ -7,18 +7,21 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeMap;
 import javax.swing.SwingWorker;
 
 import connection.Connector;
+import statistics.AnalysisResults;
 import util.PathUtils;
 import util.Log;
-
+import excel.Excel_settings;
 
 /**
  * Manages a species:
  *
- * Downloads all the data for a species from the internet using the connection
+ * Downloads all the data for a replicon from the internet using the connection
  * package (which analyses it using the statistics package) and saves the
  * results using the excel package.
  */
@@ -58,12 +61,52 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 	@Override
 	protected Void doInBackground() throws Exception {
 		Connector connector = new Connector();
+		ArrayList<String> path = new ArrayList<String>();
+		path.add((String)specieInfos.get("group"));
+		path.add((String)specieInfos.get("subGroup"));
+		path.add((String)specieInfos.get("name"));
+
+		File path_specie = PathUtils.child_from_list(kingdomDir, path);
+		File path_replicon;
+		File done_file;
+		AnalysisResults result;
+		Excel_settings excel;
 
 		for (String repliconID : (Set<String>) specieInfos.get("replicons")) {
-			// TODO this method will probably return a list of analysis results.
-			// do something fancy with the results
-			connector.downloadAndAnalyseReplicon(repliconID);
+			path.add(repliconID);
+
+			done_file 		= PathUtils.child(path_specie, repliconID, "done.json");
+
+			//If we did it, we pass at the next one
+			if(done_file.exists())
+				continue;
+
+			Log.i("miuiii");
+			path_replicon = PathUtils.child(path_specie, repliconID, "fine.xls");
+			result 				= connector.downloadAndAnalyseReplicon(repliconID);
+			excel 				= new Excel_settings(path_replicon, (String[])path.toArray());
+			Log.i("maahh");
+			if(path_replicon.exists())
+				excel.update_excel((TreeMap)result.getPhase0Frequencies(),
+													 (TreeMap)result.getPhase1Frequencies(),
+													 (TreeMap)result.getPhase2Frequencies());
+			else
+				excel.new_excel((TreeMap)result.getPhase0Frequencies(),
+												(TreeMap)result.getPhase1Frequencies(),
+												(TreeMap)result.getPhase2Frequencies());
+			Log.e("miihh");
+			try {done_file.createNewFile();}
+			catch(IOException e){Log.e(e);}
+			path.remove(path.size()-1);
 		}
+
+		//If the thread bug before this part
+		//only the good replicons will be done after that
+		for (String repliconID : (Set<String>) specieInfos.get("replicons")) {
+			done_file = PathUtils.child(path_specie, repliconID, "done.json");
+			done_file.delete();
+		}
+
 		return null;
 	}
 
@@ -75,8 +118,7 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 				/ (double) es.getTaskCount();
 				Log.i((String) specieInfos.get("name") + " done. (" +
 							es.getCompletedTaskCount() + "/" + es.getTaskCount() + ")");
-		//System.out.println(es.getCompletedTaskCount());
-		//System.out.println(es.getTaskCount());
+
 		int progress = (int) (100 * completed);
 		listener.setProgress(progress);
 		toDo(kingdomDir, specieInfos, true);

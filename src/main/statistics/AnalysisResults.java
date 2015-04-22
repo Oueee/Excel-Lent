@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class AnalysisResults {
-	
+
 	private static final String[] CDS_STRINGS = { "AAA", "AAC", "AAG", "AAT", "ACA",
 		"ACC", "ACG", "ACT", "AGA", "AGC", "AGG", "AGT", "ATA", "ATC",
 		"ATG", "ATT", "CAA", "CAC", "CAG", "CAT", "CCA", "CCC", "CCG",
@@ -41,7 +41,7 @@ public class AnalysisResults {
 	public Map<String, Integer> getPhase2Frequencies() {
 		return phase2Frequencies;
 	}
-	
+
 	public void update(CDS cds) {
 		for (int i = 0; i < 64; i++) {
 			if (noCdsTraitees != 0) {
