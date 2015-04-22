@@ -150,7 +150,7 @@ public class Header {
 	private boolean isSemanticallyWellFormed() {
         //check if the form match
 		
-        Pattern pattern = Pattern.compile("^(\\d+\\.\\.\\d+)|(complement\\((\\d+\\.\\.\\d+)\\)|complement\\(join\\((\\d+\\.\\.\\d+,)*(\\d+\\.\\.\\d+)\\)\\))$");
+        Pattern pattern = Pattern.compile("^(\\d+\\.\\.\\d+)|(join\\((\\d+\\.\\.\\d+,)*(\\d+\\.\\.\\d+)\\))|(complement\\((\\d+\\.\\.\\d+)\\)|complement\\(join\\((\\d+\\.\\.\\d+,)*(\\d+\\.\\.\\d+)\\)\\))$");
         Matcher matcher = pattern.matcher(this.location);
         boolean match = matcher.matches();
         if (match == false)
