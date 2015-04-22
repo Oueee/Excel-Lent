@@ -350,4 +350,8 @@ public class CDS {
 		return phase2FrequencyTable;
 	}
 
+	public Header getHeader() {
+		return header;
+	}
+
 }

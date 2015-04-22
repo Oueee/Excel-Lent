@@ -56,17 +56,21 @@ public class Connector {
 					// line is header
 					// last CDS has ended, so process it
 					if (currentCDS != null) {
-						boolean correct = currentCDS.isCompleteAndCorrect();
-						if (correct) {
-							results.update(currentCDS);
-						} else {
-							System.out.println("Encountered bad CDS");
-							results.foundBadCDS();
+						if (!ignoring) {
+							if (currentCDS.isCompleteAndCorrect()) {
+								results.update(currentCDS);
+							} else {
+								System.out
+										.println("Encountered bad CDS for header "
+												+ currentCDS.getHeader());
+								results.foundBadCDS();
+							}
 						}
+
 					}
 					// analyse new header
 					currentHeader = new Header(line);
-					if (currentHeader.isSemanticallyWellFormed()) {
+					if (currentHeader.isWellFormed()) {
 						// header good. parse rest of CDS until next header
 						ignoring = false;
 
@@ -76,23 +80,25 @@ public class Connector {
 						// header bad. ignore CDS until next header
 						ignoring = true;
 						results.foundBadCDS();
-						System.out.println("Encountered malformed header");
+						//System.out.println("Encountered malformed header " + currentHeader);
 					}
 				} else if (line.equals("")) {
 					// last line reached; process CDS
-					boolean correct = currentCDS.isCompleteAndCorrect();
-					if (correct) {
-						results.update(currentCDS);
-					} else {
-						System.out.println("Encountered bad CDS");
-						results.foundBadCDS();
+					if (!ignoring) {
+						if (currentCDS.isCompleteAndCorrect()) {
+							results.update(currentCDS);
+						} else {
+							System.out
+									.println("Encountered bad CDS for header "
+											+ currentCDS.getHeader());
+							results.foundBadCDS();
+						}
 					}
 				} else {
-					if (ignoring) {
-						continue;
-					}
-
-					currentCDS.add(line);
+					// this is a normal CDS line
+					if (!ignoring) {
+						currentCDS.add(line);;
+					}					
 				}
 
 			}
