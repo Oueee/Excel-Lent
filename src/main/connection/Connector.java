@@ -66,7 +66,7 @@ public class Connector {
 					}
 					// analyse new header
 					currentHeader = new Header(line);
-					if (currentHeader.isWellFormed()) {
+					if (currentHeader.isSemanticallyWellFormed()) {
 						// header good. parse rest of CDS until next header
 						ignoring = false;
 

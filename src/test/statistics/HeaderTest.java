@@ -20,7 +20,7 @@ public class HeaderTest {
 		assertEquals("complement(92480..93871)", header.getLocation());
 		assertEquals(1392, header.getExpectedCDSLength());
 
-		assertTrue(header.isWellFormed());
+		assertTrue(header.isSemanticallyWellFormed());
 		
 		headerString = ">lcl|NC_003424.3_cds_NP_595039.1_2 [gene=SPAC212.08c] [protein=CDS] [protein_id=NP_595039.1] [location=12158..12994]";
 		header = new Header(headerString);
@@ -33,12 +33,25 @@ public class HeaderTest {
 		assertEquals("12158..12994", header.getLocation());
 		assertEquals(837, header.getExpectedCDSLength());
 		
-		assertTrue(header.isWellFormed());
+		assertTrue(header.isSemanticallyWellFormed());
 		
 		headerString = "this is certainly not a well-formed header!";
 		header = new Header(headerString);
 		
-		assertFalse(header.isWellFormed());
+		assertFalse(header.isSemanticallyWellFormed());
+		
+		headerString = ">lcl|NC_000001.11_cds_NP_001005484.1_1 [gene=OR4F5] [protein=olfactory receptor 4F5] [protein_id=NP_001005484.1] [location=69091..70008]";
+		header = new Header(headerString);
+		
+		assertEquals("lcl", header.getType());
+		assertEquals("NC_000001.11_cds_NP_001005484.1_1", header.getCode());
+		assertEquals("OR4F5", header.getGene());
+		assertEquals("olfactory receptor 4F5", header.getProtein());
+		assertEquals("NP_001005484.1", header.getProteinID());
+		assertEquals("69091..70008", header.getLocation());
+		assertEquals(918, header.getExpectedCDSLength());
+		assertTrue(header.isSemanticallyWellFormed());
+		
 	}
 	
 

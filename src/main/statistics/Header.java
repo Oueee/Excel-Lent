@@ -22,15 +22,19 @@ public class Header {
 	private String location;
 
 	// this stores whether the header is syntactically well-formed
-	private boolean wellFormed;
+	private boolean syntacticallyWellFormed;
+	
+	private boolean semanticallyWellFormed;
 
 	public Header(String line) {
 		try {
 			this.parseHeader(line);
-			this.isWellFormed();
+			syntacticallyWellFormed = true;
+			System.out.println("Processed header " + line);
+			this.isSemanticallyWellFormed();
 		} catch (IOException e) {
 			// header malformed
-			wellFormed = false;
+			syntacticallyWellFormed = false;
 		}
 	}
 
@@ -143,7 +147,10 @@ public class Header {
      * change wellFormed of the class
      * @return a boolean showing if the string is well formed or not
     **/
-	public boolean isWellFormed() {
+	public boolean isSemanticallyWellFormed() {
+		if (!syntacticallyWellFormed) {
+			return false;
+		}
         //check if the form math
 		/* TODO does not work e.g. it says that the following is malformed: >lcl|NC_021245.1_cds_YP_008003511.1_1 [gene=AV2] [protein=pre-coat protein] [protein_id=YP_008003511.1] [location=133..483]
         Pattern pattern = Pattern.compile("^(complement\\((\\d+\\.\\.\\d+)\\)|complement\\(join\\((\\d+\\.\\.\\d+,)*(\\d+\\.\\.\\d+)\\)\\))$");
@@ -164,19 +171,23 @@ public class Header {
                 last = elem;
             else
             {
-                this.wellFormed = false;
-                return this.wellFormed;
+                this.semanticallyWellFormed = false;
+                return this.semanticallyWellFormed;
             }
         }
-        // check if the lenght is != %3 then elimination
-        if (this.getExpectedCDSLength()%3 != 0)
-        {
-            this.wellFormed = false;
-            return this.wellFormed;
-        }
+		// check if the lenght is != %3 then elimination
+		try {
+			if (this.getExpectedCDSLength() % 3 != 0) {
+				this.semanticallyWellFormed = false;
+				return this.semanticallyWellFormed;
+			}
+		} catch (IllegalArgumentException e) {
+			// TODO own exception type -> cleaner
+			this.semanticallyWellFormed = false;
+			return this.semanticallyWellFormed;
+		}
         
-        
-        this.wellFormed = true;
-        return this.wellFormed;
+        this.semanticallyWellFormed = true;
+        return this.semanticallyWellFormed;
 	}
 }
