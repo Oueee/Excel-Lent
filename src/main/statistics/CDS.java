@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import util.Log;
 
+import util.NucleotidException;
+
 /**
  * CDS class
  *
@@ -164,45 +166,45 @@ public class CDS {
 	 * @param third
 	 * @param decrement
 	 */
-	private void count(int phase, byte first, byte second, byte third, boolean decrement) {
+	private void count(int phase, byte first, byte second, byte third, boolean decrement) throws NucleotidException {
 		int index_of_trinucleotide = 0;
 		// Axx: from 0 to 15; Cxx: from 16 to 31; Gxx: from 32 to 47; Txx: from
 		// 48 to 64
 		switch (first) {
 		case BASE_T:
-			index_of_trinucleotide += 16;
+			index_of_trinucleotide += 16; break;
 		case BASE_G:
-			index_of_trinucleotide += 16;
+			index_of_trinucleotide += 16; break;
 		case BASE_C:
-			index_of_trinucleotide += 16;
+			index_of_trinucleotide += 16; break;
 		case BASE_A:
 			break;
-		default:
+		default: throw new NucleotidException();
 			// TODO throw exception
 		}
 		// xA: from 0 to 3 / 16 to 19 / 32 to 35 / 48 to 51
 		switch (second) {
 		case BASE_T:
-			index_of_trinucleotide += 4;
+			index_of_trinucleotide += 4; break;
 		case BASE_G:
-			index_of_trinucleotide += 4;
+			index_of_trinucleotide += 4; break;
 		case BASE_C:
-			index_of_trinucleotide += 4;
+			index_of_trinucleotide += 4; break;
 		case BASE_A:
 			break;
-		default:
+		default: throw new NucleotidException();
 			// TODO throw exception
 		}
 		switch (third) {
 		case BASE_T:
-			index_of_trinucleotide++;
+			index_of_trinucleotide++; break;
 		case BASE_G:
-			index_of_trinucleotide++;
+			index_of_trinucleotide++; break;
 		case BASE_C:
-			index_of_trinucleotide++;
+			index_of_trinucleotide++; break;
 		case BASE_A:
 			break;
-		default:
+		default: throw new NucleotidException();
 			// TODO throw exception
 		}
 		switch (phase) {
@@ -228,7 +230,11 @@ public class CDS {
 	}
 
 	private void count(int phase, byte first, byte second, byte third) {
-		this.count(phase, first, second, third, false);
+            try{
+            this.count(phase, first, second, third, false);
+            }catch(NucleotidException e)
+            {// what to do ???
+            }
 	}
 
 	/**
@@ -333,9 +339,15 @@ public class CDS {
         // if we have made it here, everything is fine
 
 		// do not count stop codon
-		this.count(0, lastThreeBytesFromLastLine[0],
-				lastThreeBytesFromLastLine[1], lastThreeBytesFromLastLine[2],
-				true);
+        try
+        {
+            this.count(0, lastThreeBytesFromLastLine[0],
+                    lastThreeBytesFromLastLine[1], lastThreeBytesFromLastLine[2],
+                    true);
+        } catch(NucleotidException e)
+        {
+            return false;
+        }
         return true;
 	}
 
@@ -349,6 +361,10 @@ public class CDS {
 
 	public int[] getPhase2FrequencyTable() {
 		return phase2FrequencyTable;
+	}
+
+	public Header getHeader() {
+		return header;
 	}
 
 }

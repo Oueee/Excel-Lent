@@ -15,6 +15,7 @@ import util.Log;
  */
 public class Header {
 
+	private String headerLine;
 	private String type;
 	private String code;
 	private String gene;
@@ -22,16 +23,19 @@ public class Header {
 	private String proteinID;
 	private String location;
 
-	// this stores whether the header is syntactically well-formed
+	// this stores whether the header is well-formed (both syntactically and semantically)
 	private boolean wellFormed;
 
 	public Header(String line) {
+		this.headerLine = line;
 		try {
 			this.parseHeader(line);
-			this.isWellFormed();
+			// header is syntactically well-formed, check semantics
+			this.wellFormed = this.isSemanticallyWellFormed();
 		} catch (IOException e) {
-			// header malformed
-			wellFormed = false;
+			// header syntactically malformed
+			System.out.println("HEADER MALFORMED: Syntax error in " + line);
+			this.wellFormed = false;
 		}
 	}
 
@@ -144,19 +148,25 @@ public class Header {
      * change wellFormed of the class
      * @return a boolean showing if the string is well formed or not
     **/
-	public boolean isWellFormed() {
+	private boolean isSemanticallyWellFormed() {
         //check if the form match
-		//TODO does not work e.g. it says that the following is malformed: >lcl|NC_021245.1_cds_YP_008003511.1_1 [gene=AV2] [protein=pre-coat protein] [protein_id=YP_008003511.1] [location=133..483]
-        // => work now
-        Pattern pattern = Pattern.compile("^(\\d+\\.\\.\\d+)|(complement\\((\\d+\\.\\.\\d+)\\)|complement\\(join\\((\\d+\\.\\.\\d+,)*(\\d+\\.\\.\\d+)\\)\\))$");
+		
+        Pattern pattern = Pattern.compile("^(\\d+\\.\\.\\d+)|(join\\((\\d+\\.\\.\\d+,)*(\\d+\\.\\.\\d+)\\))|(complement\\((\\d+\\.\\.\\d+)\\)|complement\\(join\\((\\d+\\.\\.\\d+,)*(\\d+\\.\\.\\d+)\\)\\))$");
         Matcher matcher = pattern.matcher(this.location);
         boolean match = matcher.matches();
         if (match == false)
         {
+<<<<<<< HEAD
         	Log.w("No match for header pattern");
             this.wellFormed = false;
             return this.wellFormed;
         }
+=======
+        	System.out.println("HEADER MALFORMED: No match for header pattern in " + this.headerLine);
+            return false;
+        } 
+        
+>>>>>>> 189646bd8d4b1e2ac7274fc8b710ede7c45f7fb9
         //check if the number are in the right order
         List<Integer> list = StringUtils.findNumbersInString(this.location);
         int last = -1;
@@ -166,10 +176,11 @@ public class Header {
                 last = elem;
             else
             {
-                this.wellFormed = false;
-                return this.wellFormed;
+                System.out.println("HEADER MALFORMED: Header numbers not in the right order in " + this.headerLine);
+                return false;
             }
         }
+<<<<<<< HEAD
         // check if the lenght is != %3 then elimination
         if (this.getExpectedCDSLength()%3 != 0)
         {
@@ -180,5 +191,29 @@ public class Header {
 
         this.wellFormed = true;
         return this.wellFormed;
+=======
+		// check if the lenght is != %3 then elimination
+		try {
+			if (this.getExpectedCDSLength() % 3 != 0) {
+				System.out.println("HEADER MALFORMED: CDS length not divisible by 3 in " + this.headerLine);
+				return false;
+			}
+		} catch (IllegalArgumentException e) {
+			// TODO own exception type -> cleaner
+			System.out.println("HEADER MALFORMED: Uneven number of numbers in location in " + this.headerLine);
+			return false;
+		}
+        
+        return true;
+	}
+	
+	public boolean isWellFormed() {
+		return this.wellFormed;
+	}
+
+	@Override
+	public String toString() {
+		return headerLine;
+>>>>>>> 189646bd8d4b1e2ac7274fc8b710ede7c45f7fb9
 	}
 }
