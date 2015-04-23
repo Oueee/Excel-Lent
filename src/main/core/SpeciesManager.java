@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 import javax.swing.SwingWorker;
+import java.util.Arrays;
 
 import connection.Connector;
 import statistics.AnalysisResults;
@@ -70,8 +71,9 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 		File path_replicon;
 		File done_file;
 		AnalysisResults result;
-		Excel_settings excel;
+		Excel_settings es = null;
 
+		path.add(0, kingdomDir.getName());
 		for (String repliconID : (Set<String>) specieInfos.get("replicons")) {
 			path.add(repliconID);
 
@@ -81,20 +83,14 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 			if(done_file.exists())
 				continue;
 
-			Log.i("miuiii");
 			path_replicon = PathUtils.child(path_specie, repliconID, "fine.xls");
 			result 				= connector.downloadAndAnalyseReplicon(repliconID);
-			excel 				= new Excel_settings(path_replicon, (String[])path.toArray());
-			Log.i("maahh");
-			if(path_replicon.exists())
-				excel.update_excel((TreeMap)result.getPhase0Frequencies(),
-													 (TreeMap)result.getPhase1Frequencies(),
-													 (TreeMap)result.getPhase2Frequencies());
-			else
-				excel.new_excel((TreeMap)result.getPhase0Frequencies(),
-												(TreeMap)result.getPhase1Frequencies(),
-												(TreeMap)result.getPhase2Frequencies());
-			Log.e("miihh");
+			es		 				= new Excel_settings(path_replicon, path);
+			Excel_settings.update_helper(es,
+												 (TreeMap)result.getPhase0Frequencies(),
+												 (TreeMap)result.getPhase2Frequencies(),
+							   				 (TreeMap)result.getPhase1Frequencies());
+
 			try {done_file.createNewFile();}
 			catch(IOException e){Log.e(e);}
 			path.remove(path.size()-1);
@@ -116,8 +112,8 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 	protected void done() {
 		double completed = (double) (es.getCompletedTaskCount())
 				/ (double) es.getTaskCount();
-				Log.i((String) specieInfos.get("name") + " done. (" +
-							es.getCompletedTaskCount() + "/" + es.getTaskCount() + ")");
+				Log.i("[" + es.getCompletedTaskCount() + "/" + es.getTaskCount() + "] " +
+							(String) specieInfos.get("name"));
 
 		int progress = (int) (100 * completed);
 		listener.setProgress(progress);

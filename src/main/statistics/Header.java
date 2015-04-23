@@ -7,6 +7,7 @@ import java.util.regex.*;
 
 
 import util.StringUtils;
+import util.Log;
 
 /**
  * Header for a CDS
@@ -37,7 +38,7 @@ public class Header {
 	/**
 	 * This method parses the header and sets the member variables. It throws an
 	 * exception if it fails, to detect syntactically incorrect header.
-	 * 
+	 *
 	 * @param line
 	 * @throws IOException
 	 */
@@ -85,11 +86,11 @@ public class Header {
 	/**
 	 * Get the expected length of the corresponding CDS by summing the absolute
 	 * differences of the pairs in the location:
-	 * 
+	 *
 	 * e.g. location=complement(1...50) -> sum = abs(1-50) + 1
 	 * location=complement(join(4...60),join(56..70)) -> sum = abs(4-60) + 1
 	 * abs(56-70) + 1
-	 * 
+	 *
 	 * @return
 	 */
 	public int getExpectedCDSLength() {
@@ -135,11 +136,11 @@ public class Header {
 	}
 
 	// TODO possibly do more checks
-    /** Check is the location is well formed 
+    /** Check is the location is well formed
      * it should be something like : complement(join(2..34,42..4200))
      * /!\ Only one complement and one join and .. to separate two number
      * in the string a..b,c..d  a < b, b < c, c < d
-     * 
+     *
      * change wellFormed of the class
      * @return a boolean showing if the string is well formed or not
     **/
@@ -152,10 +153,10 @@ public class Header {
         boolean match = matcher.matches();
         if (match == false)
         {
-        	System.out.println("No match for header pattern");
+        	Log.w("No match for header pattern");
             this.wellFormed = false;
             return this.wellFormed;
-        } 
+        }
         //check if the number are in the right order
         List<Integer> list = StringUtils.findNumbersInString(this.location);
         int last = -1;
@@ -175,8 +176,8 @@ public class Header {
             this.wellFormed = false;
             return this.wellFormed;
         }
-        
-        
+
+
         this.wellFormed = true;
         return this.wellFormed;
 	}

@@ -2,6 +2,7 @@ package statistics;
 
 import java.io.IOException;
 import java.util.Arrays;
+import util.Log;
 
 /**
  * CDS class
@@ -304,12 +305,12 @@ public class CDS {
 	public boolean isCompleteAndCorrect() {
 		// check if length is the same as expected from header
 		if (length != header.getExpectedCDSLength()) {
-			//System.out.println("CDS BAD: Unexpected CDS length of " + length + " (expected: " + header.getExpectedCDSLength());
+			Log.w("CDS BAD: Unexpected CDS length of " + length + " (expected: " + header.getExpectedCDSLength());
 			return false;
 		}
 
 		if (!beginningIsStartCodon) {
-			//System.out.println("CDS BAD: Beginning is not start codon");
+			Log.w("CDS BAD: Beginning is not start codon");
 			return false;
 		}
 

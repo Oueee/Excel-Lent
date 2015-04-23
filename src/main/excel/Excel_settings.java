@@ -5,6 +5,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -27,15 +30,17 @@ import util.Log;
 public class Excel_settings {
 	// Attributes
 	private Workbook wb;
-	private String[] table;
+	private ArrayList<String> table;
 	private TreeMap<String,Integer>[] old_tab;
 	private File f;
+	private String f_name;
 
 	// Constructor
-	public Excel_settings (File f, String[] path) throws InvalidFormatException, IOException
+	public Excel_settings (File f, ArrayList<String> path) throws InvalidFormatException, IOException
 	{
 		wb = new HSSFWorkbook();
 		this.f = f;
+		this.f_name = f.getName();
 		table = path;
 	}
 
@@ -50,22 +55,20 @@ public class Excel_settings {
 	 * 		Number of nucleotide in phase 2.
 	 * @throws IOException
 	 */
-	public void new_excel (final TreeMap<String,Integer> nucleotide_to_number_1,final TreeMap<String,Integer> nucleotide_to_number_2, final TreeMap<String,Integer> nucleotide_to_number_3) throws IOException
-	{
-		Log.e("yo");
+	private void new_excel (final List<TreeMap<String,Integer>> diff) throws IOException{
 		f.createNewFile();
 		FileOutputStream fileout = new FileOutputStream(f);
-		String safename = WorkbookUtil.createSafeSheetName(table[table.length-1]);
+		String name_element = table.get(table.size()-1);
+		String safename = WorkbookUtil.createSafeSheetName(name_element);
 		Sheet sheet1 = wb.createSheet(safename);
 		CellStyle cellStyle = wb.createCellStyle();
 		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
 
 		Row row = sheet1.createRow(0);
+
 		// Name
 		row.createCell(0).setCellValue("Nom");
-		row.createCell(1).setCellValue(table[table.length-1]);
-
-
+		row.createCell(1).setCellValue(name_element);
 
 		row = sheet1.createRow(1);
 		row.createCell(0).setCellValue("Chemin");
@@ -120,7 +123,7 @@ public class Excel_settings {
 
 		// Key of map
 		i = 7;
-		for (Map.Entry<String, Integer> entry : nucleotide_to_number_1.entrySet())
+		for (Map.Entry<String, Integer> entry : diff.get(0).entrySet())
 		{
 			String key = entry.getKey();
 			row = sheet1.createRow(i++);
@@ -155,26 +158,96 @@ public class Excel_settings {
 	 * @param nucleotide_to_number_3
 	 * 		Number of nucleotide in phase 2.
 	 */
-	public void update_excel(final TreeMap<String,Integer> nucleotide_to_number_1, final TreeMap<String,Integer> nucleotide_to_number_2, final TreeMap<String,Integer> nucleotide_to_number_3)
+	private void update_excel(final List<TreeMap<String,Integer>> diff)
 	{
-		Log.e("update excel");
+		//Must be thread safe ;)
+		;
 	}
 
 	// Current tab
-	public TreeMap<String,Integer>[] old_tab()
+	private TreeMap<String,Integer>[] old_tab()
 	{
 		return old_tab;
 	}
 
+	//Okay, not a very fun name aha
+	public static void update_helper(Excel_settings es,
+												 final TreeMap<String,Integer> nucleotide_to_number_1,
+								  			 final TreeMap<String,Integer> nucleotide_to_number_2,
+												 final TreeMap<String,Integer> nucleotide_to_number_3) throws IOException, InvalidFormatException
+	{
+
+		List<TreeMap<String,Integer>> diff = new ArrayList<TreeMap<String,Integer>>();
+
+		diff.add(nucleotide_to_number_1);
+		diff.add(nucleotide_to_number_2);
+		diff.add(nucleotide_to_number_3);
+
+		//If it's an update (and not a new excel file)
+		//We check the difference, otherwise the difference is just the new.
+		//because the difference btw 0 and a number is the number
+		if(es.f.exists()) {
+			TreeMap<String,Integer>[] old_tabs = es.old_tab();
+			TreeMap<String,Integer> old_tab;
+			TreeMap<String,Integer> diff_tab;
+
+			for(int i = 0; i < 3; i++) {
+				old_tab = old_tabs[i];
+				diff_tab = diff.get(i);
+			//diff = new - old
+			//if new is more than old, diff is positive (the difference btw then
+			//The same if new is less, but diff is obviously negative)
+			for (Map.Entry<String, Integer> entry : old_tab.entrySet())
+				diff_tab.put(entry.getKey(), diff_tab.get(entry.getKey()) - entry.getValue());
+			}
+		}
+
+		update_helper_aux(es, diff);
+	}
+
+	public static void update_helper_aux(Excel_settings es, List<TreeMap<String,Integer>> diff) throws IOException, InvalidFormatException
+	{
+		////// Do the action
+		if(es.f.exists())
+			es.update_excel(diff);
+		else
+			es.new_excel(diff);
+
+		//Stop the recurssion if it's the kingom root
+		//0 means, tree directory, I think it's better to concatanate the three kingdom after
+		//Otherwise all the threads will modify it, a bit tricky I guess.
+		if(es.table.size() <= 1)
+			return;
+
+		////// Up one level
+		ArrayList<String> table_parent = new ArrayList<String>();
+
+		for(String p : es.table)
+			table_parent.add(p);
+
+		table_parent.remove(table_parent.size() - 1);
+		File f_parent = es.f.getParentFile().getParentFile();
+		f_parent = new File(f_parent, es.f_name);
+
+		Excel_settings es_parent = new Excel_settings(f_parent, table_parent);
+
+		update_helper_aux(es_parent, diff);
+	}
+
 	public static void main (String[] args) throws InvalidFormatException, IOException
 	{
-		String[] chemin = {"chemin","de","sa","mere"};
-		File fil = new File ("/home/mjeremy/stats.xls");
+		ArrayList<String> chemin = new ArrayList<String>();
+		chemin.add("Viruses");
+		chemin.add("dsRNA viruses");
+
+		File fil = new File ("/home/rinku/Workspaces/Cours/bio_info/Excel-Lent/tree/Viruses/dsRNA viruses/test.xls");
 		Excel_settings es = new Excel_settings(fil, chemin);
 		TreeMap<String,Integer> test = new TreeMap<String,Integer>();
+
 		test.put("AAA", 100);
 		test.put("AAC", 69);
 		test.put("IZI", 92);
-		es.new_excel(test, null, null);
+
+		update_helper(es, test, null, null);
 	}
 }
