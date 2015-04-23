@@ -150,23 +150,16 @@ public class Header {
     **/
 	private boolean isSemanticallyWellFormed() {
         //check if the form match
-		
+
         Pattern pattern = Pattern.compile("^(\\d+\\.\\.\\d+)|(join\\((\\d+\\.\\.\\d+,)*(\\d+\\.\\.\\d+)\\))|(complement\\((\\d+\\.\\.\\d+)\\)|complement\\(join\\((\\d+\\.\\.\\d+,)*(\\d+\\.\\.\\d+)\\)\\))$");
         Matcher matcher = pattern.matcher(this.location);
         boolean match = matcher.matches();
         if (match == false)
         {
-<<<<<<< HEAD
-        	Log.w("No match for header pattern");
-            this.wellFormed = false;
-            return this.wellFormed;
+        		System.out.println("HEADER MALFORMED: No match for header pattern in " + this.headerLine);
+          	return false;
         }
-=======
-        	System.out.println("HEADER MALFORMED: No match for header pattern in " + this.headerLine);
-            return false;
-        } 
-        
->>>>>>> 189646bd8d4b1e2ac7274fc8b710ede7c45f7fb9
+
         //check if the number are in the right order
         List<Integer> list = StringUtils.findNumbersInString(this.location);
         int last = -1;
@@ -180,18 +173,6 @@ public class Header {
                 return false;
             }
         }
-<<<<<<< HEAD
-        // check if the lenght is != %3 then elimination
-        if (this.getExpectedCDSLength()%3 != 0)
-        {
-            this.wellFormed = false;
-            return this.wellFormed;
-        }
-
-
-        this.wellFormed = true;
-        return this.wellFormed;
-=======
 		// check if the lenght is != %3 then elimination
 		try {
 			if (this.getExpectedCDSLength() % 3 != 0) {
@@ -203,10 +184,10 @@ public class Header {
 			System.out.println("HEADER MALFORMED: Uneven number of numbers in location in " + this.headerLine);
 			return false;
 		}
-        
+
         return true;
 	}
-	
+
 	public boolean isWellFormed() {
 		return this.wellFormed;
 	}
@@ -214,6 +195,5 @@ public class Header {
 	@Override
 	public String toString() {
 		return headerLine;
->>>>>>> 189646bd8d4b1e2ac7274fc8b710ede7c45f7fb9
 	}
 }

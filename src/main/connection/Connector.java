@@ -80,11 +80,6 @@ public class Connector {
 						// header bad. ignore CDS until next header
 						ignoring = true;
 						results.foundBadCDS();
-<<<<<<< HEAD
-						Log.w("Encountered malformed header");
-=======
-						//System.out.println("Encountered malformed header " + currentHeader);
->>>>>>> 189646bd8d4b1e2ac7274fc8b710ede7c45f7fb9
 					}
 				} else if (line.equals("")) {
 					// last line reached; process CDS
@@ -102,7 +97,7 @@ public class Connector {
 					// this is a normal CDS line
 					if (!ignoring) {
 						currentCDS.add(line);;
-					}					
+					}
 				}
 
 			}
