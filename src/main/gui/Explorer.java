@@ -1,6 +1,8 @@
 package gui;
 
 import java.awt.Dimension;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 
 import javax.swing.*;
@@ -22,6 +24,7 @@ public class Explorer extends JPanel
 	{
 		//on recupère les lecteurs
 		_roots = debut;
+		
 		generation();
 	}
 	public void refreshTree(String path)
@@ -30,6 +33,9 @@ public class Explorer extends JPanel
 		this._roots = rep.listFiles();
 		this.removeAll();
 		this.generation();
+		 for (int row = 0; row < _dirs.getRowCount() ; row++) {
+		      _dirs.expandRow(row);
+		    }
 		
 	}
 	private void generation()
@@ -39,18 +45,54 @@ public class Explorer extends JPanel
 		
 		
 		// on définit notre premier noeud
-		DefaultMutableTreeNode racine = new DefaultMutableTreeNode("Poste de travail",true);
+		DefaultMutableTreeNode racine = new DefaultMutableTreeNode("Tout",true);
 		
 		// Création du jtree
 		_dirs = new JTree(racine);
 		//_dirs.setSize(700,200);
-		
+		_dirs.addMouseListener(new MouseListener() {
+			
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseClicked(MouseEvent me) {
+				// TODO Auto-generated method stub
+				
+				 TreePath tp = _dirs.getPathForLocation(me.getX(), me.getY());
+				System.out.println(tp.getLastPathComponent());
+				Global.choix = tp.getLastPathComponent().toString();
+				Global.btn_run.setEnabled(true);
+				Global.lbl.setText("Click run for DL :"+tp.getLastPathComponent());
+			}
+		});
 		// pour chaque lecteur
 		for (int i = 0 ; i<_roots.length ; i++)
 		{
 			// on recupère son contenu grace a getSubDirs
 			DefaultMutableTreeNode root = getSubDirs(_roots[i]);
-			
+		
 			// et on l ajoute a notre premier noeud
 			racine.add(root);
 			
