@@ -7,8 +7,10 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import statistics.AnalysisResults;
 import statistics.CDS;
 import statistics.Header;
+import util.Log;
 
 /**
  * Manages the internet connection
@@ -20,20 +22,22 @@ public class Connector {
 	private static final String URL_PREFIX = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=";
 	private static final String URL_SUFFIX = "&rettype=fasta_cds_na&retmode=text";
 
+	private AnalysisResults results = new AnalysisResults();
+
 	/**
 	 * Downloads replicon data from the internet.
-	 * 
+	 *
 	 * As some data sets can be huge, the results are analysed per CDS and not per replicon
 	 * TODO Therefore, this method should probably return the results of the analysis
 	 * @param repliconID
 	 * @throws IOException
 	 */
-	public void downloadAndAnalyseReplicon(String repliconID) throws IOException {
+	public AnalysisResults downloadAndAnalyseReplicon(String repliconID) throws IOException {
 		String urlString = URL_PREFIX + repliconID + URL_SUFFIX;
 		URL url = new URL(urlString);
 		HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
 		int responseCode = httpConn.getResponseCode();
-		
+
 		// always check HTTP response code first
 		if (responseCode == HttpURLConnection.HTTP_OK) {
 			// opens input stream from the HTTP connection
@@ -46,21 +50,24 @@ public class Connector {
 			Header currentHeader;
 			CDS currentCDS = null;
 			while ((line = reader.readLine()) != null) {
-				// System.out.println("reading line " + line);
-				if (ignoring)
-					continue;
 
 				// check if header
 				if (line.startsWith(">")) {
 					// line is header
 					// last CDS has ended, so process it
-					if (currentCDS != null)
+					if (currentCDS != null) {
+						if (!ignoring) {
+							if (currentCDS.isCompleteAndCorrect()) {
+								results.update(currentCDS);
+							} else {
+								System.out
+										.println("Encountered bad CDS for header "
+												+ currentCDS.getHeader());
+								results.foundBadCDS();
+							}
+						}
 
-						// TODO instead, the method analyse will probably return
-						// some analysis result, which can be added to a list
-						// and returned by this method
-						currentCDS.analyse();
-
+					}
 					// analyse new header
 					currentHeader = new Header(line);
 					if (currentHeader.isWellFormed()) {
@@ -72,20 +79,39 @@ public class Connector {
 					} else {
 						// header bad. ignore CDS until next header
 						ignoring = true;
+						results.foundBadCDS();
+					}
+				} else if (line.equals("")) {
+					// last line reached; process CDS
+					if (!ignoring) {
+						if (currentCDS.isCompleteAndCorrect()) {
+							results.update(currentCDS);
+						} else {
+							System.out
+									.println("Encountered bad CDS for header "
+											+ currentCDS.getHeader());
+							results.foundBadCDS();
+						}
 					}
 				} else {
-					// this is part of a CDS
-					currentCDS.add(line);
+					// this is a normal CDS line
+					if (!ignoring) {
+						currentCDS.add(line);;
+					}
 				}
 
 			}
 			reader.close();
 		} else {
-			// Log.e("No file to download. Server replied HTTP code: " +
-			// responseCode);
+			Log.e("No file to download. Server replied HTTP code: " + responseCode);
 		}
 		httpConn.disconnect();
 
+		// TODO save to Excel
+
+		// print everything
+		//System.out.println(results);
+		return results;
 	}
-	
+
 }

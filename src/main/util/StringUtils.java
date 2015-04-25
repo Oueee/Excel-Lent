@@ -79,7 +79,6 @@ public class StringUtils {
 			// reached the end of string before the expected symbol came. header
 			// is malformed!
 			if (symbol == -1) {
-				System.out.println("exceptoin");
 				throw new IOException();
 			}
 
