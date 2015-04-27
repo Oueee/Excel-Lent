@@ -1,27 +1,25 @@
 package excel;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.channels.SeekableByteChannel;
+import java.nio.channels.FileLock;
+import java.nio.channels.FileChannel;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.WorkbookUtil;
-
-import util.Log;
 
 /**
  * Class to manage the Excel (create/update).
@@ -86,10 +84,14 @@ public class Excel_settings {
 	 * Create a new xls with the number of each nucleotide.
 	 * @param diff
 	 * 		The number of the trinucleotide phases.
+	 * @param nb_cds
+	 * 		The number of treated CDS.
+	 * @param nb_cds_nt_treat
+	 * 		The number of untreated CDS.
 	 * @throws IOException
 	 * @see Excel_settings#update_helper_aux(Excel_settings, List)
 	 */
-	private void new_excel (final List<TreeMap<String,Integer>> diff) throws IOException{
+	private void new_excel (final List<TreeMap<String,Integer>> diff,final int nb_cds, final int nb_cds_nt_treat) throws IOException{
 		f.createNewFile();
 		FileOutputStream fileout = new FileOutputStream(f);
 		String name_element = table.get(table.size()-1);
@@ -176,14 +178,25 @@ public class Excel_settings {
 		cell.setCellValue("Total");
 		// -----------------------------------------------------------------------
 
+		// not really effecient...
 		for(i = 0 ; i < 7 ; i++)
 			sheet1.autoSizeColumn(i,true);
 		
-		double nb_tr = fill_excel(diff,sheet1);
+		row = sheet1.getRow(2);
+		cell = row.createCell(1);
+		cell.setCellStyle(cellStyle);
+		cell.setCellValue(nb_cds);
+		
+		double nb_tr = fill_excel(diff,sheet1,nb_cds,nb_cds_nt_treat);
 		row = sheet1.getRow(3);
 		cell = row.createCell(1);
 		cell.setCellStyle(cellStyle);
 		cell.setCellValue(nb_tr);
+		
+		row = sheet1.getRow(4);
+		cell = row.createCell(1);
+		cell.setCellStyle(cellStyle);
+		cell.setCellValue(nb_cds_nt_treat);
 		
 		wb.write(fileout);
 		fileout.close();
@@ -194,25 +207,38 @@ public class Excel_settings {
 	 * Update the old xls with new number of each nucleotide.
 	 * @param diff
 	 * 		Difference between the 3 new and old trunicleotide phases.
+	 * @param nb_cds
+	 * 		The number of treated CDS.
+	 * @param nb_cds_nt_treat
+	 * 		The number of untreated CDS.
 	 * @throws IOException 
+	 * @throws InterruptedException 
 	 * @see Excel_settings#update_helper_aux(Excel_settings, List)
 	 */
-	private void update_excel(final List<TreeMap<String,Integer>> diff) throws IOException
+	private void update_excel(final List<TreeMap<String,Integer>> diff,final int nb_cds, final int nb_cds_nt_treat) throws IOException, InterruptedException
 	{
 		FileOutputStream fileout = new FileOutputStream(f);
+		FileChannel fchannel = null;
+		
+		fchannel = fileout.getChannel();
+		FileLock lock;
+		while ((lock = fchannel.tryLock(0, Long.MAX_VALUE, false)) == null)
+			Thread.sleep(1000); // wait the disponibility of the file
+		lock.release(); // lock the file
+		
 		Sheet sheet1 = wb.getSheetAt(0);
 		CellStyle cellStyle = wb.createCellStyle();
 		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
 		
-		double nb_tr = fill_excel(diff,sheet1);
+		double nb_tr = fill_excel(diff,sheet1,nb_cds,nb_cds_nt_treat);
 		Row row = sheet1.getRow(3);
 		Cell cell = row.getCell(1);
 		cell.setCellStyle(cellStyle);
 		cell.setCellValue(nb_tr);
 		
 		wb.write(fileout);
+		fchannel.close();
 		fileout.close();
-		//Must be thread safe ;)
 	}
 	
 	/**
@@ -221,28 +247,34 @@ public class Excel_settings {
 	 * 		Value to write it.
 	 * @return
 	 * 		Trinucleotides treated.
-	 * @see Excel_settings#new_excel(List)
-	 * @see Excel_settings#update_excel(List)
+	 * @param nb_cds
+	 * 		The number of treated CDS.
+	 * @param nb_cds_nt_treat
+	 * 		The number of untreated CDS.
+	 * @see Excel_settings#new_excel(List, int, int)
+	 * @see Excel_settings#update_excel(List, int, int)
 	 */
-	private double fill_excel(final List<TreeMap<String, Integer>> value, Sheet sheet1)
+	private double fill_excel(final List<TreeMap<String, Integer>> value, Sheet sheet1,
+			final int nb_cds, final int nb_cds_nt_treat )
 	{
 		CellStyle cellStyle = wb.createCellStyle();
 		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
 		
-		final int min = 7;
-		final int max = 70;
+		final int min = 7; // row min
+		final int max = 70; // row max
 		
-		int j = 1;
+		int j = 1; // current column
 		
 		int phase = 0;
-		final String[] phases = {"B","D","F"};
-		final String[] phases_perc = {"C","E","G"};
+		final String[] phases = {"B","D","F"}; // count phases
+		final String[] phases_perc = {"C","E","G"}; // percentage phases
 		
+		// for the 3 phases
 		for (TreeMap<String,Integer> tree : value)
 		{
 			int current = 0 + min;
 			for (Map.Entry<String, Integer> entry : tree.entrySet())
-			{
+			{ // for each trinucleotides
 				Row row = sheet1.getRow(current++);
 				Cell cell = row.createCell(j);
 				cell.setCellStyle(cellStyle);
@@ -253,9 +285,13 @@ public class Excel_settings {
 			Cell cell = row.createCell(j);
 			String letter = phases[phase++];
 			cell.setCellStyle(cellStyle);
+			// sum of the column count
 			cell.setCellFormula("SUM("+ letter +"8:"+ letter +"71)");
 			j+=2;
 		}
+		
+		DataFormat format = wb.createDataFormat();
+		cellStyle.setDataFormat(format.getFormat("0.00"));
 		
 		for (int i = 0,cur=2 ; i < 3 && cur<7 ; i++,cur+=2)
 		{
@@ -265,6 +301,7 @@ public class Excel_settings {
 				Row row = sheet1.getRow(k);
 				Cell cell = row.createCell(cur);
 				cell.setCellStyle(cellStyle);
+				// percentage
 				cell.setCellFormula(letter + k + "/" + letter + "72");
 			}
 		}
@@ -296,13 +333,20 @@ public class Excel_settings {
 	 * 		Number of trinucleotide in phase 1.
 	 * @param nucleotide_to_number_3
 	 * 		Number of trinucleotide in phase 2.
+	 * @param nb_cds
+	 * 		Number of treated CDS.
+	 * @param nb_cds_untreated
+	 * 		Number of not treated CDS.
 	 * @throws IOException
 	 * @throws InvalidFormatException
+	 * @throws InterruptedException 
 	 */
 	public static void update_helper(Excel_settings es,
 									final TreeMap<String,Integer> nucleotide_to_number_1,
 								  	final TreeMap<String,Integer> nucleotide_to_number_2,
-									final TreeMap<String,Integer> nucleotide_to_number_3) throws IOException, InvalidFormatException
+									final TreeMap<String,Integer> nucleotide_to_number_3,
+									final int nb_cds,
+									final int nb_cds_untreated) throws IOException, InvalidFormatException, InterruptedException
 	{
 
 		List<TreeMap<String,Integer>> diff = new ArrayList<TreeMap<String,Integer>>();
@@ -330,7 +374,7 @@ public class Excel_settings {
 			}
 		}
 
-		update_helper_aux(es, diff);
+		update_helper_aux(es, diff,nb_cds,nb_cds_untreated);
 	}
 
 	/**
@@ -339,17 +383,24 @@ public class Excel_settings {
 	 * 		File to update.
 	 * @param diff
 	 * 		Difference in the number of trinucleotides.
+	 * @param nb_cds
+	 * 		Number of treated CDS.
+	 * @param nb_cds_untreated
+	 * 		Number of not treated CDS.
 	 * @throws IOException
 	 * @throws InvalidFormatException
+	 * @throws InterruptedException 
 	 * @see Excel_settings#update_helper(Excel_settings, TreeMap, TreeMap, TreeMap)
 	 */
-	public static void update_helper_aux(Excel_settings es, List<TreeMap<String,Integer>> diff) throws IOException, InvalidFormatException
+	public static void update_helper_aux(Excel_settings es, List<TreeMap<String,Integer>> diff,
+										final int nb_cds,
+										final int nb_cds_untreated) throws IOException, InvalidFormatException, InterruptedException
 	{
 		////// Do the action
 		if(es.f.exists())
-			es.update_excel(diff);
+			es.update_excel(diff,nb_cds,nb_cds_untreated);
 		else
-			es.new_excel(diff);
+			es.new_excel(diff,nb_cds,nb_cds_untreated);
 
 		//Stop the recursion if it's the kingdom root
 		//0 means, tree directory, I think it's better to concatenate the three kingdom after
@@ -369,10 +420,10 @@ public class Excel_settings {
 
 		Excel_settings es_parent = new Excel_settings(f_parent, table_parent);
 
-		update_helper_aux(es_parent, diff);
+		update_helper_aux(es_parent, diff,nb_cds,nb_cds_untreated);
 	}
 
-	public static void main (String[] args) throws InvalidFormatException, IOException
+	public static void main (String[] args) throws InvalidFormatException, IOException, InterruptedException
 	{
 		ArrayList<String> chemin = new ArrayList<String>();
 		chemin.add("Viruses");
@@ -386,6 +437,6 @@ public class Excel_settings {
 		test.put("AAC", 69);
 		test.put("IZI", 92);
 
-		update_helper(es, test, null, null);
+		update_helper(es, test, null, null,0,0);
 	}
 }
