@@ -1,8 +1,10 @@
 package excel;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.SeekableByteChannel;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.ArrayList;
@@ -29,10 +31,45 @@ import util.Log;
  */
 public class Excel_settings {
 	// Attributes
+	/**
+	 * The current Workbook.
+	 * @see Excel_settings#Excel_settings(File, ArrayList)
+	 * @see Excel_settings#new_excel(List)
+	 * @see Excel_settings#update_excel(List)
+	 * @see Excel_settings#fill_excel(List, Sheet)
+	 */
 	private Workbook wb;
+	
+	/**
+	 * Path of the trinucleotides.
+	 * @see Excel_settings#Excel_settings(File, ArrayList)
+	 * @see Excel_settings#new_excel(List)
+	 * @see Excel_settings#update_excel(List)
+	 * @see Excel_settings#update_helper_aux(Excel_settings, List)
+	 */
 	private ArrayList<String> table;
+	
+	/**
+	 * Used to compare new and old numbers of trinucleotides.
+	 * @see Excel_settings#old_tab()
+	 * @see Excel_settings#update_helper(Excel_settings, TreeMap, TreeMap, TreeMap)
+	 */
 	private TreeMap<String,Integer>[] old_tab;
+	
+	/**
+	 * Current file.
+	 * @see Excel_settings#Excel_settings(File, ArrayList)
+	 * @see Excel_settings#new_excel(List)
+	 * @see Excel_settings#update_excel(List)
+	 * @see Excel_settings#update_helper(Excel_settings, TreeMap, TreeMap, TreeMap)
+	 * @see Excel_settings#update_helper_aux(Excel_settings, List)
+	 */
 	private File f;
+	
+	/**
+	 * Name of the current file.
+	 * @see Excel_settings#update_helper_aux(Excel_settings, List)
+	 */
 	private String f_name;
 
 	// Constructor
@@ -47,13 +84,10 @@ public class Excel_settings {
 	// Create
 	/**
 	 * Create a new xls with the number of each nucleotide.
-	 * @param nucleotide_to_number_1
-	 * 		Number of nucleotide in phase 0.
-	 * @param nucleotide_to_number_2
-	 * 		Number of nucleotide in phase 1.
-	 * @param nucleotide_to_number_3
-	 * 		Number of nucleotide in phase 2.
+	 * @param diff
+	 * 		The number of the trinucleotide phases.
 	 * @throws IOException
+	 * @see Excel_settings#update_helper_aux(Excel_settings, List)
 	 */
 	private void new_excel (final List<TreeMap<String,Integer>> diff) throws IOException{
 		f.createNewFile();
@@ -144,6 +178,13 @@ public class Excel_settings {
 
 		for(i = 0 ; i < 7 ; i++)
 			sheet1.autoSizeColumn(i,true);
+		
+		double nb_tr = fill_excel(diff,sheet1);
+		row = sheet1.getRow(3);
+		cell = row.createCell(1);
+		cell.setCellStyle(cellStyle);
+		cell.setCellValue(nb_tr);
+		
 		wb.write(fileout);
 		fileout.close();
 	}
@@ -151,30 +192,117 @@ public class Excel_settings {
 	// Update
 	/**
 	 * Update the old xls with new number of each nucleotide.
-	 * @param nucleotide_to_number_1
-	 * 		Number of nucleotide in phase 0.
-	 * @param nucleotide_to_number_2
-	 * 		Number of nucleotide in phase 1.
-	 * @param nucleotide_to_number_3
-	 * 		Number of nucleotide in phase 2.
+	 * @param diff
+	 * 		Difference between the 3 new and old trunicleotide phases.
+	 * @throws IOException 
+	 * @see Excel_settings#update_helper_aux(Excel_settings, List)
 	 */
-	private void update_excel(final List<TreeMap<String,Integer>> diff)
+	private void update_excel(final List<TreeMap<String,Integer>> diff) throws IOException
 	{
+		FileOutputStream fileout = new FileOutputStream(f);
+		Sheet sheet1 = wb.getSheetAt(0);
+		CellStyle cellStyle = wb.createCellStyle();
+		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+		
+		double nb_tr = fill_excel(diff,sheet1);
+		Row row = sheet1.getRow(3);
+		Cell cell = row.getCell(1);
+		cell.setCellStyle(cellStyle);
+		cell.setCellValue(nb_tr);
+		
+		wb.write(fileout);
+		fileout.close();
 		//Must be thread safe ;)
-		;
+	}
+	
+	/**
+	 * Allow to fill the excel file either a creating either an update.
+	 * @param value
+	 * 		Value to write it.
+	 * @return
+	 * 		Trinucleotides treated.
+	 * @see Excel_settings#new_excel(List)
+	 * @see Excel_settings#update_excel(List)
+	 */
+	private double fill_excel(final List<TreeMap<String, Integer>> value, Sheet sheet1)
+	{
+		CellStyle cellStyle = wb.createCellStyle();
+		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+		
+		final int min = 7;
+		final int max = 70;
+		
+		int j = 1;
+		
+		int phase = 0;
+		final String[] phases = {"B","D","F"};
+		final String[] phases_perc = {"C","E","G"};
+		
+		for (TreeMap<String,Integer> tree : value)
+		{
+			int current = 0 + min;
+			for (Map.Entry<String, Integer> entry : tree.entrySet())
+			{
+				Row row = sheet1.getRow(current++);
+				Cell cell = row.createCell(j);
+				cell.setCellStyle(cellStyle);
+				cell.setCellValue(entry.getValue());
+			}
+			
+			Row row = sheet1.getRow(max+1);
+			Cell cell = row.createCell(j);
+			String letter = phases[phase++];
+			cell.setCellStyle(cellStyle);
+			cell.setCellFormula("SUM("+ letter +"8:"+ letter +"71)");
+			j+=2;
+		}
+		
+		for (int i = 0,cur=2 ; i < 3 && cur<7 ; i++,cur+=2)
+		{
+			String letter = phases_perc[i];
+			for (int k = 7 ; k < 72 ; k++)
+			{
+				Row row = sheet1.getRow(k);
+				Cell cell = row.createCell(cur);
+				cell.setCellStyle(cellStyle);
+				cell.setCellFormula(letter + k + "/" + letter + "72");
+			}
+		}
+		
+		Row row = sheet1.getRow(max+1);
+		Cell cell = row.getCell(1);
+		
+		return cell.getNumericCellValue();
 	}
 
-	// Current tab
+	/**
+	 * Get the old trinucleotide phases.
+	 * @return attribute <b>old_tab</b>
+	 */
 	private TreeMap<String,Integer>[] old_tab()
 	{
 		return old_tab;
 	}
 
 	//Okay, not a very fun name aha
+	/**
+	 * List the difference to do in each file in the path.<br>
+	 * (for example in <b>SubGroup</b>, update [<b>Group</b>,<b>KingDom</b>])
+	 * @param es
+	 * 		The xls file to update.
+	 * @param nucleotide_to_number_1
+	 * 		Number of trinucleotide in phase 0.
+	 * @param nucleotide_to_number_2
+	 * 		Number of trinucleotide in phase 1.
+	 * @param nucleotide_to_number_3
+	 * 		Number of trinucleotide in phase 2.
+	 * @throws IOException
+	 * @throws InvalidFormatException
+	 */
 	public static void update_helper(Excel_settings es,
-												 final TreeMap<String,Integer> nucleotide_to_number_1,
-								  			 final TreeMap<String,Integer> nucleotide_to_number_2,
-												 final TreeMap<String,Integer> nucleotide_to_number_3) throws IOException, InvalidFormatException
+									final TreeMap<String,Integer> nucleotide_to_number_1,
+								  	final TreeMap<String,Integer> nucleotide_to_number_2,
+									final TreeMap<String,Integer> nucleotide_to_number_3) throws IOException, InvalidFormatException
 	{
 
 		List<TreeMap<String,Integer>> diff = new ArrayList<TreeMap<String,Integer>>();
@@ -205,6 +333,16 @@ public class Excel_settings {
 		update_helper_aux(es, diff);
 	}
 
+	/**
+	 * Auxiliary function used to iterate on the file in the path.
+	 * @param es
+	 * 		File to update.
+	 * @param diff
+	 * 		Difference in the number of trinucleotides.
+	 * @throws IOException
+	 * @throws InvalidFormatException
+	 * @see Excel_settings#update_helper(Excel_settings, TreeMap, TreeMap, TreeMap)
+	 */
 	public static void update_helper_aux(Excel_settings es, List<TreeMap<String,Integer>> diff) throws IOException, InvalidFormatException
 	{
 		////// Do the action
@@ -213,8 +351,8 @@ public class Excel_settings {
 		else
 			es.new_excel(diff);
 
-		//Stop the recurssion if it's the kingom root
-		//0 means, tree directory, I think it's better to concatanate the three kingdom after
+		//Stop the recursion if it's the kingdom root
+		//0 means, tree directory, I think it's better to concatenate the three kingdom after
 		//Otherwise all the threads will modify it, a bit tricky I guess.
 		if(es.table.size() <= 1)
 			return;
