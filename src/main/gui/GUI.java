@@ -132,7 +132,7 @@ public class GUI  extends JFrame{
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
           Global.gui = new GUI();
-          Global.gui.refresh(System.getProperty("user.dir"));
+        
         }
         });
         
