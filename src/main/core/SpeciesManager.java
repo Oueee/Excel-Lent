@@ -60,7 +60,8 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 	}
 
 	@Override
-	protected Void doInBackground() throws Exception {
+	protected Void doInBackground() {
+		try{
 		Connector connector = new Connector();
 		ArrayList<String> path = new ArrayList<String>();
 		path.add((String)specieInfos.get("group"));
@@ -78,7 +79,10 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 			path.add(repliconID);
 
 			done_file 		= PathUtils.child(path_specie, repliconID, "done.json");
-
+			if(((String) specieInfos.get("name")).equals("Abaca bunchy top virus"))
+			{
+				Log.d("###################################################################");
+			}
 			//If we did it, we pass at the next one
 			if(done_file.exists())
 				continue;
@@ -94,15 +98,25 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 												 result.getNoCdsNonTraitees());
 
 			try {done_file.createNewFile();}
-			catch(IOException e){Log.e(e);}
+			catch(IOException e){
+				Log.e(e);
+				Log.exit();
+			}
 			path.remove(path.size()-1);
 		}
-
+		if(((String) specieInfos.get("name")).equals("Abaca bunchy top virus"))
+		{
+			Log.exit();
+		}
 		//If the thread bug before this part
 		//only the good replicons will be done after that
 		for (String repliconID : (Set<String>) specieInfos.get("replicons")) {
 			done_file = PathUtils.child(path_specie, repliconID, "done.json");
 			done_file.delete();
+		}
+	}	catch(Exception e){
+			Log.e(e);
+			//Log.exit();
 		}
 
 		return null;
@@ -132,8 +146,11 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 		if(option)
 		{
 			try {done_file.createNewFile();}
-			catch(IOException e){Log.e(e);}
-
+			catch(IOException e){
+				Log.e(done_file);
+				Log.e(e);
+				Log.exit();
+			}
 		}
 		else
 			done_file.delete();

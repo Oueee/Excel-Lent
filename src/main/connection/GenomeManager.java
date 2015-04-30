@@ -270,6 +270,10 @@ public class GenomeManager {
         if(newSpecies.has(name))
             return false;
 
+				//If the specie hasn't any replicons, do nothing
+				if(((Set<String>)specie.get("replicons")).size() <= 0)
+					return false;
+
         specie_saved.put("modify_date", modify_date);
         newSpecies.put(name, specie_saved);
 
@@ -291,6 +295,7 @@ public class GenomeManager {
         else if(!path_specie.exists()) {
             Log.e("The specie path " + path_specie.getAbsolutePath() +
                   " doesn't exist anymore. However, we have already parse it");
+						Log.exit();
         }
         else {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");

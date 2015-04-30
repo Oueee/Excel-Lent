@@ -60,9 +60,11 @@ public class Connector {
 							if (currentCDS.isCompleteAndCorrect()) {
 								results.update(currentCDS);
 							} else {
+								/*
 								System.out
 										.println("Encountered bad CDS for header "
 												+ currentCDS.getHeader());
+								*/
 								results.foundBadCDS();
 							}
 						}
@@ -87,9 +89,11 @@ public class Connector {
 						if (currentCDS.isCompleteAndCorrect()) {
 							results.update(currentCDS);
 						} else {
+							/*
 							System.out
 									.println("Encountered bad CDS for header "
 											+ currentCDS.getHeader());
+							*/
 							results.foundBadCDS();
 						}
 					}

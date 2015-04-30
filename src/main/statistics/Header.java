@@ -34,7 +34,7 @@ public class Header {
 			this.wellFormed = this.isSemanticallyWellFormed();
 		} catch (IOException e) {
 			// header syntactically malformed
-			System.out.println("HEADER MALFORMED: Syntax error in " + line);
+			//System.out.println("HEADER MALFORMED: Syntax error in " + line);
 			this.wellFormed = false;
 		}
 	}
@@ -156,7 +156,7 @@ public class Header {
         boolean match = matcher.matches();
         if (match == false)
         {
-        		System.out.println("HEADER MALFORMED: No match for header pattern in " + this.headerLine);
+        		//System.out.println("HEADER MALFORMED: No match for header pattern in " + this.headerLine);
           	return false;
         }
 
@@ -169,19 +169,19 @@ public class Header {
                 last = elem;
             else
             {
-                System.out.println("HEADER MALFORMED: Header numbers not in the right order in " + this.headerLine);
+                //System.out.println("HEADER MALFORMED: Header numbers not in the right order in " + this.headerLine);
                 return false;
             }
         }
 		// check if the lenght is != %3 then elimination
 		try {
 			if (this.getExpectedCDSLength() % 3 != 0) {
-				System.out.println("HEADER MALFORMED: CDS length not divisible by 3 in " + this.headerLine);
+				//System.out.println("HEADER MALFORMED: CDS length not divisible by 3 in " + this.headerLine);
 				return false;
 			}
 		} catch (IllegalArgumentException e) {
 			// TODO own exception type -> cleaner
-			System.out.println("HEADER MALFORMED: Uneven number of numbers in location in " + this.headerLine);
+			//System.out.println("HEADER MALFORMED: Uneven number of numbers in location in " + this.headerLine);
 			return false;
 		}
 
