@@ -62,6 +62,7 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 	@Override
 	protected Void doInBackground() {
 		try{
+
 		Connector connector = new Connector();
 		ArrayList<String> path = new ArrayList<String>();
 		path.add((String)specieInfos.get("group"));
@@ -77,19 +78,18 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 		path.add(0, kingdomDir.getName());
 		for (String repliconID : (Set<String>) specieInfos.get("replicons")) {
 			path.add(repliconID);
-
 			done_file 		= PathUtils.child(path_specie, repliconID, "done.json");
-			if(((String) specieInfos.get("name")).equals("Abaca bunchy top virus"))
-			{
-				Log.d("###################################################################");
-			}
+
 			//If we did it, we pass at the next one
 			if(done_file.exists())
 				continue;
 
+
 			path_replicon = PathUtils.child(path_specie, repliconID, "fine.xls");
+
 			result 				= connector.downloadAndAnalyseReplicon(repliconID);
 			es		 				= new Excel_settings(path_replicon, path);
+
 			Excel_settings.update_helper(es,
 												 (TreeMap)result.getPhase0Frequencies(),
 												 (TreeMap)result.getPhase2Frequencies(),
@@ -97,15 +97,18 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 												 result.getNoCdsTraitees(),
 												 result.getNoCdsNonTraitees());
 
-			try {done_file.createNewFile();}
-			catch(IOException e){
-				Log.e(e);
-				Log.exit();
-			}
+												if(((String) specieInfos.get("name")).equals("Mushroom bacilliform virus"))
+												{
+													Log.d("###################################################################");
+												}
+
+			done_file.createNewFile();
+
 			path.remove(path.size()-1);
 		}
 		if(((String) specieInfos.get("name")).equals("Abaca bunchy top virus"))
 		{
+			Log.d("mahh");
 			Log.exit();
 		}
 		//If the thread bug before this part
@@ -116,7 +119,7 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 		}
 	}	catch(Exception e){
 			Log.e(e);
-			//Log.exit();
+			Log.exit();
 		}
 
 		return null;

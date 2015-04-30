@@ -38,7 +38,7 @@ public class ExcelLent implements Runnable {
 	@Override
 	public void run() {
 		ThreadPoolExecutor es = (ThreadPoolExecutor) Executors
-				.newFixedThreadPool(10);
+				.newFixedThreadPool(1);
 
 	    File project_root = new File(System.getProperty("user.dir"));
 

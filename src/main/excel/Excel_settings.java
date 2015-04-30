@@ -21,6 +21,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.WorkbookUtil;
 
+import util.Log;
 /**
  * Class to manage the Excel (create/update).
  * @author mjeremy
@@ -37,7 +38,7 @@ public class Excel_settings {
 	 * @see Excel_settings#fill_excel(List, Sheet)
 	 */
 	private Workbook wb;
-	
+
 	/**
 	 * Path of the trinucleotides.
 	 * @see Excel_settings#Excel_settings(File, ArrayList)
@@ -46,14 +47,14 @@ public class Excel_settings {
 	 * @see Excel_settings#update_helper_aux(Excel_settings, List)
 	 */
 	private ArrayList<String> table;
-	
+
 	/**
 	 * Used to compare new and old numbers of trinucleotides.
 	 * @see Excel_settings#old_tab()
 	 * @see Excel_settings#update_helper(Excel_settings, TreeMap, TreeMap, TreeMap)
 	 */
 	private TreeMap<String,Integer>[] old_tab;
-	
+
 	/**
 	 * Current file.
 	 * @see Excel_settings#Excel_settings(File, ArrayList)
@@ -63,7 +64,9 @@ public class Excel_settings {
 	 * @see Excel_settings#update_helper_aux(Excel_settings, List)
 	 */
 	private File f;
-	
+
+	private FileLock lock;
+
 	/**
 	 * Name of the current file.
 	 * @see Excel_settings#update_helper_aux(Excel_settings, List)
@@ -92,8 +95,6 @@ public class Excel_settings {
 	 * @see Excel_settings#update_helper_aux(Excel_settings, List)
 	 */
 	private void new_excel (final List<TreeMap<String,Integer>> diff,final int nb_cds, final int nb_cds_nt_treat) throws IOException{
-		f.createNewFile();
-		FileOutputStream fileout = new FileOutputStream(f);
 		String name_element = table.get(table.size()-1);
 		String safename = WorkbookUtil.createSafeSheetName(name_element);
 		Sheet sheet1 = wb.createSheet(safename);
@@ -181,26 +182,41 @@ public class Excel_settings {
 		// not really effecient...
 		for(i = 0 ; i < 7 ; i++)
 			sheet1.autoSizeColumn(i,true);
-		
+
 		row = sheet1.getRow(2);
 		cell = row.createCell(1);
 		cell.setCellStyle(cellStyle);
 		cell.setCellValue(nb_cds);
-		
+
 		double nb_tr = fill_excel(diff,sheet1,nb_cds,nb_cds_nt_treat);
 		row = sheet1.getRow(3);
 		cell = row.createCell(1);
 		cell.setCellStyle(cellStyle);
 		cell.setCellValue(nb_tr);
-		
+
 		row = sheet1.getRow(4);
 		cell = row.createCell(1);
 		cell.setCellStyle(cellStyle);
 		cell.setCellValue(nb_cds_nt_treat);
-		
-		wb.write(fileout);
-		fileout.close();
 	}
+
+	private FileChannel lock(FileOutputStream fileout) throws IOException, InterruptedException {
+		FileChannel fchannel = null;
+
+		fchannel = fileout.getChannel();
+		while ((this.lock = fchannel.tryLock(0, Long.MAX_VALUE, false)) == null)
+			Thread.sleep(1000); // wait the disponibility of the file
+
+		return fchannel;
+	}
+
+	private void release(FileChannel fchannel) throws IOException {
+		//this.lock.release();
+		//release block, doesn't work ?
+		//unlock when the channel is close (c.f the doc)
+		fchannel.close();
+	}
+
 
 	// Update
 	/**
@@ -211,36 +227,23 @@ public class Excel_settings {
 	 * 		The number of treated CDS.
 	 * @param nb_cds_nt_treat
 	 * 		The number of untreated CDS.
-	 * @throws IOException 
-	 * @throws InterruptedException 
+	 * @throws IOException
+	 * @throws InterruptedException
 	 * @see Excel_settings#update_helper_aux(Excel_settings, List)
 	 */
 	private void update_excel(final List<TreeMap<String,Integer>> diff,final int nb_cds, final int nb_cds_nt_treat) throws IOException, InterruptedException
 	{
-		FileOutputStream fileout = new FileOutputStream(f);
-		FileChannel fchannel = null;
-		
-		fchannel = fileout.getChannel();
-		FileLock lock;
-		while ((lock = fchannel.tryLock(0, Long.MAX_VALUE, false)) == null)
-			Thread.sleep(1000); // wait the disponibility of the file
-		lock.release(); // lock the file
-		
 		Sheet sheet1 = wb.getSheetAt(0);
 		CellStyle cellStyle = wb.createCellStyle();
 		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
-		
+
 		double nb_tr = fill_excel(diff,sheet1,nb_cds,nb_cds_nt_treat);
 		Row row = sheet1.getRow(3);
 		Cell cell = row.getCell(1);
 		cell.setCellStyle(cellStyle);
 		cell.setCellValue(nb_tr);
-		
-		wb.write(fileout);
-		fchannel.close();
-		fileout.close();
 	}
-	
+
 	/**
 	 * Allow to fill the excel file either a creating either an update.
 	 * @param value
@@ -259,16 +262,16 @@ public class Excel_settings {
 	{
 		CellStyle cellStyle = wb.createCellStyle();
 		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
-		
+
 		final int min = 7; // row min
 		final int max = 70; // row max
-		
+
 		int j = 1; // current column
-		
+
 		int phase = 0;
 		final String[] phases = {"B","D","F"}; // count phases
 		final String[] phases_perc = {"C","E","G"}; // percentage phases
-		
+
 		// for the 3 phases
 		for (TreeMap<String,Integer> tree : value)
 		{
@@ -280,7 +283,7 @@ public class Excel_settings {
 				cell.setCellStyle(cellStyle);
 				cell.setCellValue(entry.getValue());
 			}
-			
+
 			Row row = sheet1.getRow(max+1);
 			Cell cell = row.createCell(j);
 			String letter = phases[phase++];
@@ -289,26 +292,26 @@ public class Excel_settings {
 			cell.setCellFormula("SUM("+ letter +"8:"+ letter +"71)");
 			j+=2;
 		}
-		
+
 		DataFormat format = wb.createDataFormat();
 		cellStyle.setDataFormat(format.getFormat("0.00"));
-		
+
 		for (int i = 0,cur=2 ; i < 3 && cur<7 ; i++,cur+=2)
 		{
-			String letter = phases_perc[i];
+			String letter = phases[i];
 			for (int k = 7 ; k < 72 ; k++)
 			{
 				Row row = sheet1.getRow(k);
 				Cell cell = row.createCell(cur);
 				cell.setCellStyle(cellStyle);
 				// percentage
-				cell.setCellFormula(letter + k + "/" + letter + "72");
+				cell.setCellFormula(letter + (k+1) + "/" + letter + "72");
 			}
 		}
-		
+
 		Row row = sheet1.getRow(max+1);
 		Cell cell = row.getCell(1);
-		
+
 		return cell.getNumericCellValue();
 	}
 
@@ -339,11 +342,11 @@ public class Excel_settings {
 	 * 		Number of not treated CDS.
 	 * @throws IOException
 	 * @throws InvalidFormatException
-	 * @throws InterruptedException 
+	 * @throws InterruptedException
 	 */
 	public static void update_helper(Excel_settings es,
 									final TreeMap<String,Integer> nucleotide_to_number_1,
-								  	final TreeMap<String,Integer> nucleotide_to_number_2,
+									final TreeMap<String,Integer> nucleotide_to_number_2,
 									final TreeMap<String,Integer> nucleotide_to_number_3,
 									final int nb_cds,
 									final int nb_cds_untreated) throws IOException, InvalidFormatException, InterruptedException
@@ -389,18 +392,40 @@ public class Excel_settings {
 	 * 		Number of not treated CDS.
 	 * @throws IOException
 	 * @throws InvalidFormatException
-	 * @throws InterruptedException 
+	 * @throws InterruptedException
 	 * @see Excel_settings#update_helper(Excel_settings, TreeMap, TreeMap, TreeMap)
 	 */
 	public static void update_helper_aux(Excel_settings es, List<TreeMap<String,Integer>> diff,
 										final int nb_cds,
 										final int nb_cds_untreated) throws IOException, InvalidFormatException, InterruptedException
 	{
-		////// Do the action
-		if(es.f.exists())
-			es.update_excel(diff,nb_cds,nb_cds_untreated);
-		else
-			es.new_excel(diff,nb_cds,nb_cds_untreated);
+
+		boolean exist = true;
+
+		if(!es.f.exists()) {
+			exist = false;
+			es.f.createNewFile();
+		}
+
+		FileOutputStream fileout = new FileOutputStream(es.f);
+
+		/////////////////
+		//// Secured part start
+		//FileChannel fchannel = es.lock(fileout);
+		if(es.table.contains("Borna disease virus"))
+
+			////// Do the action
+			if(exist)
+				es.update_excel(diff,nb_cds,nb_cds_untreated);
+			else
+				es.new_excel(diff,nb_cds,nb_cds_untreated);
+
+			es.wb.write(fileout);
+			fileout.close();
+
+		//es.release(fchannel);
+		//// Secured part ended
+		/////////////////
 
 		//Stop the recursion if it's the kingdom root
 		//0 means, tree directory, I think it's better to concatenate the three kingdom after

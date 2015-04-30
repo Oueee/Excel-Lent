@@ -117,11 +117,11 @@ public class GUI  extends JFrame{
 						choice.add(v_cb);
 
 						e_cb = new JCheckBox("Eukaryotes");
-						e_cb.setSelected(true);
+						e_cb.setSelected(false);
 						choice.add(e_cb);
 
 						p_cb = new JCheckBox("Prokaryotes");
-						p_cb.setSelected(true);
+						p_cb.setSelected(false);
 						choice.add(p_cb);
 
 						choice.add(Global.btn_run);
