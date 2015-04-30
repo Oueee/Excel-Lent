@@ -19,6 +19,7 @@ public class ExcelLent implements Runnable {
     private static GenomeManager virusesManager;
     private static GenomeManager eukaryotesManager;
     private static GenomeManager prokaryotesManager;
+    private static boolean toDo[];
 
 	ThreadPoolExecutor es;
 	ProgressBarListener listener;
@@ -27,49 +28,61 @@ public class ExcelLent implements Runnable {
 		this.listener = listener;
 	}
 
+  public void setToDo(boolean v, boolean e, boolean p) {
+    this.toDo = new boolean[3];
+    toDo[0] = v;
+    toDo[1] = e;
+    toDo[2] = p;
+  }
+
 	@Override
 	public void run() {
 		ThreadPoolExecutor es = (ThreadPoolExecutor) Executors
 				.newFixedThreadPool(10);
-	    
+
 	    File project_root = new File(System.getProperty("user.dir"));
 
 	    File urls_path = new File(project_root, "urls_lists.json");
 	    File tree_root = new File(project_root, "tree");
-        
+
         if(!urls_path.exists())
-            Log.e("Doesn't find urls_lists.json file." + 
+            Log.e("Doesn't find urls_lists.json file." +
             " Maybe you have to run the application from the " +
             "root directory of the project.");
-        
+
         if(!tree_root.exists() || !tree_root.isDirectory())
-            Log.e("Doesn't root of the genome tree." + 
+            Log.e("Doesn't root of the genome tree." +
             " Maybe you have to the application from the " +
             "root directory of the project.");
-            
+
         JSONObject urls = getUrls(urls_path);
 
-        Log.i("Initializing genomes managers");
-        
         try{
+          if(toDo[0]) {
+            Log.i("Checking viruses");
             virusesManager = new GenomeManager(new File(tree_root, "Viruses"),
                                     new URL(urls.get("Viruses").toString()));
+            virusesManager.AddSpeciesThreads(es, listener);
+          }
+          if(toDo[1]) {
+            Log.i("Checking eukaryotes");
             eukaryotesManager = new GenomeManager(new File(tree_root, "Eukaryotes"),
                                     new URL(urls.get("Eukaryotes").toString()));
+            eukaryotesManager.AddSpeciesThreads(es, listener);
+          }
+          if(toDo[2]) {
+            Log.i("Checking prokaryote");
             prokaryotesManager = new GenomeManager(new File(tree_root, "Prokaryote"),
                                     new URL(urls.get("Prokaryote").toString()));
+            prokaryotesManager.AddSpeciesThreads(es, listener);
+          }
+
         }catch(Exception e) {
             Log.e(e);
         }
-        
-        Log.i("Getting the lists and checking what to update");
-        virusesManager.AddSpeciesThreads(es, listener);
-        eukaryotesManager.AddSpeciesThreads(es, listener);
-        prokaryotesManager.AddSpeciesThreads(es, listener);
-
 	}
-	
-	
+
+
 	private static JSONObject getUrls(File urls_path) {
 	    String urls = null;
 	    try{
@@ -82,7 +95,7 @@ public class ExcelLent implements Runnable {
         } catch(Exception e) {
             Log.e(e);
         }
-        
+
         return (JSONObject) new JSONObject(urls);
 	}
 }
