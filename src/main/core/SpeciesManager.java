@@ -89,7 +89,9 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 			Excel_settings.update_helper(es,
 												 (TreeMap)result.getPhase0Frequencies(),
 												 (TreeMap)result.getPhase2Frequencies(),
-							   				 (TreeMap)result.getPhase1Frequencies());
+							   				 (TreeMap)result.getPhase1Frequencies(),
+												 result.getNoCdsTraitees(),
+												 result.getNoCdsNonTraitees());
 
 			try {done_file.createNewFile();}
 			catch(IOException e){Log.e(e);}
