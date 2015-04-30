@@ -89,7 +89,11 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 
 			result 				= connector.downloadAndAnalyseReplicon(repliconID);
 			es		 				= new Excel_settings(path_replicon, path);
+			Log.d(result.toString());
+			for (Map.Entry<String, Integer> entry : ((TreeMap<String, Integer>)result.getPhase0Frequencies()).entrySet())
+				Log.d(entry.getValue());
 
+			Log.exit();
 			Excel_settings.update_helper(es,
 												 (TreeMap)result.getPhase0Frequencies(),
 												 (TreeMap)result.getPhase2Frequencies(),
@@ -97,19 +101,9 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 												 result.getNoCdsTraitees(),
 												 result.getNoCdsNonTraitees());
 
-												if(((String) specieInfos.get("name")).equals("Mushroom bacilliform virus"))
-												{
-													Log.d("###################################################################");
-												}
-
 			done_file.createNewFile();
 
 			path.remove(path.size()-1);
-		}
-		if(((String) specieInfos.get("name")).equals("Abaca bunchy top virus"))
-		{
-			Log.d("mahh");
-			Log.exit();
 		}
 		//If the thread bug before this part
 		//only the good replicons will be done after that

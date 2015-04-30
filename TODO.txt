@@ -1,0 +1,5 @@
+-gerer la mise a jour des excels le long des branches
+  ou tout refaire de zero a chaque fois (juste un thread donc pas de soucie de data race)
+-telecharger les genomes en entiers et les zipper
+-gestion des statistiques massives (nico)
+-

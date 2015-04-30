@@ -412,7 +412,6 @@ public class Excel_settings {
 		/////////////////
 		//// Secured part start
 		//FileChannel fchannel = es.lock(fileout);
-		if(es.table.contains("Borna disease virus"))
 
 			////// Do the action
 			if(exist)
@@ -430,6 +429,10 @@ public class Excel_settings {
 		//Stop the recursion if it's the kingdom root
 		//0 means, tree directory, I think it's better to concatenate the three kingdom after
 		//Otherwise all the threads will modify it, a bit tricky I guess.
+
+		return;
+
+		/*
 		if(es.table.size() <= 1)
 			return;
 
@@ -446,6 +449,7 @@ public class Excel_settings {
 		Excel_settings es_parent = new Excel_settings(f_parent, table_parent);
 
 		update_helper_aux(es_parent, diff,nb_cds,nb_cds_untreated);
+		*/
 	}
 
 	public static void main (String[] args) throws InvalidFormatException, IOException, InterruptedException
