@@ -10,8 +10,7 @@ import shutil
 
 attributs = {
     'flags': '-g',# -Xlint:all',
-    'main_class': 'gui.GUI', #'excel.Excel_settings'
-    #'main_class': 'excel.Excel_settings',
+    'main_class': 'core.MainConsole'#'gui.GUI', #'excel.Excel_settings'
 }
 
 ### compile parts
@@ -27,8 +26,8 @@ def build(self):
 
 
 ### run parts
-def run(self):
-    subprocess.call('java -cp "lib/poi-3.11/*:bin" {}'.format(self.main_class),
+def run(self, *args):
+    subprocess.call('java -cp "lib/poi-3.11/*:bin" {} {}'.format(self.main_class, ' '.join(args)),
                         shell=True)
 
 
