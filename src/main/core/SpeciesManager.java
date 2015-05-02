@@ -89,9 +89,7 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 
 			result 				= connector.downloadAndAnalyseReplicon(repliconID);
 			es		 				= new Excel_settings(path_replicon, path);
-			Log.d(result.toString());
-			Log.exit();
-			
+
 			Excel_settings.update_helper(es,
 												 (TreeMap)result.getPhase0Frequencies(),
 												 (TreeMap)result.getPhase2Frequencies(),
