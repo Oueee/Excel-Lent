@@ -94,7 +94,7 @@ public class Excel_settings {
 	 * @throws IOException
 	 * @see Excel_settings#update_helper_aux(Excel_settings, List)
 	 */
-	private void new_excel (final List<TreeMap<String,Integer>> diff,final int nb_cds, final int nb_cds_nt_treat) throws IOException{
+	private void new_excel (final List<TreeMap<String,Integer>> diff,final int nb_cds, final int nb_cds_nt_treat, final int nb_tr) throws IOException{
 		String name_element = table.get(table.size()-1);
 		String safename = WorkbookUtil.createSafeSheetName(name_element);
 		Sheet sheet1 = wb.createSheet(safename);
@@ -188,7 +188,7 @@ public class Excel_settings {
 		cell.setCellStyle(cellStyle);
 		cell.setCellValue(nb_cds);
 
-		double nb_tr = fill_excel(diff,sheet1,nb_cds,nb_cds_nt_treat);
+		fill_excel(diff,sheet1,nb_cds,nb_cds_nt_treat);
 		row = sheet1.getRow(3);
 		cell = row.createCell(1);
 		cell.setCellStyle(cellStyle);
@@ -358,6 +358,10 @@ public class Excel_settings {
 		diff.add(nucleotide_to_number_2);
 		diff.add(nucleotide_to_number_3);
 
+		int nb_tr = 0;
+		for (Map.Entry<String, Integer> entry : nucleotide_to_number_1.entrySet())
+			nb_tr += entry.getValue();
+
 		//If it's an update (and not a new excel file)
 		//We check the difference, otherwise the difference is just the new.
 		//because the difference btw 0 and a number is the number
@@ -377,7 +381,7 @@ public class Excel_settings {
 			}
 		}
 
-		update_helper_aux(es, diff,nb_cds,nb_cds_untreated);
+		update_helper_aux(es, diff,nb_cds,nb_cds_untreated, nb_tr);
 	}
 
 	/**
@@ -397,7 +401,8 @@ public class Excel_settings {
 	 */
 	public static void update_helper_aux(Excel_settings es, List<TreeMap<String,Integer>> diff,
 										final int nb_cds,
-										final int nb_cds_untreated) throws IOException, InvalidFormatException, InterruptedException
+										final int nb_cds_untreated,
+										final int nb_tr) throws IOException, InvalidFormatException, InterruptedException
 	{
 
 		boolean exist = true;
@@ -417,7 +422,7 @@ public class Excel_settings {
 			if(exist)
 				es.update_excel(diff,nb_cds,nb_cds_untreated);
 			else
-				es.new_excel(diff,nb_cds,nb_cds_untreated);
+				es.new_excel(diff,nb_cds,nb_cds_untreated,nb_tr);
 
 			es.wb.write(fileout);
 			fileout.close();
