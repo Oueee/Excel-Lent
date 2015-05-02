@@ -35,7 +35,7 @@ public class CDS {
 	private static final byte BASE_T = 84;
 
 	// phase of the next trinucleotide to be read
-	private byte phaseOfNextTrinucleotide = 0;
+	private long phaseOfNextTrinucleotide = 0;
 
 	// last three bytes from the last line, to calculate phases "split" between added lines
 	private byte[] lastThreeBytesFromLastLine = new byte[3];
@@ -67,13 +67,13 @@ public class CDS {
 			// There was at least one line before this in the CDS
 
 			// Count the trinucleotide consisting of the last two elements from the last line + first element of this line
-			this.count(phaseOfNextTrinucleotide%3, lastThreeBytesFromLastLine[1],
+			this.count((byte) (phaseOfNextTrinucleotide % 3), lastThreeBytesFromLastLine[1],
 					lastThreeBytesFromLastLine[2], (byte) line.charAt(0));
 			phaseOfNextTrinucleotide++;
 
 			// Count the trinucleotide consisting of the last element of the last line + first two elements of this line
 			if (line.length() >= 2) {
-				this.count(phaseOfNextTrinucleotide%3,
+				this.count((byte) (phaseOfNextTrinucleotide % 3),
 						lastThreeBytesFromLastLine[2], (byte) line.charAt(0),
 						(byte) line.charAt(1));
 				phaseOfNextTrinucleotide++;
@@ -87,7 +87,7 @@ public class CDS {
 
         // go through string, counting trinucleotides
 		while (position + 2 < line.length()) {
-			count(phaseOfNextTrinucleotide%3,
+			count((byte) (phaseOfNextTrinucleotide % 3),
 					(byte) line.charAt(position),
 					(byte) line.charAt(position + 1),
 					(byte) line.charAt(position + 2));
@@ -139,7 +139,7 @@ public class CDS {
 	 * @param third
 	 * @param decrement
 	 */
-	private void count(int phase, byte first, byte second, byte third, boolean decrement) throws NucleotidException {
+	private void count(byte phase, byte first, byte second, byte third, boolean decrement) throws NucleotidException {
 		int index_of_trinucleotide = 0;
 		// Axx: from 0 to 15; Cxx: from 16 to 31; Gxx: from 32 to 47; Txx: from
 		// 48 to 64
@@ -199,7 +199,7 @@ public class CDS {
 		}
 	}
 
-	private void count(int phase, byte first, byte second, byte third) {
+	private void count(byte phase, byte first, byte second, byte third) {
             try{
             this.count(phase, first, second, third, false);
             }catch(NucleotidException e)
@@ -241,15 +241,17 @@ public class CDS {
                 break;
             }
         }
-		if (lastTrinucleotideEqualsAStopCodon == false)
+		if (lastTrinucleotideEqualsAStopCodon == false) {
+			//Log.w("CDS BAD: Last trinucleotide is not a stop codon");
 			return false;
+		}
 
         // if we have made it here, everything is fine
 
 		// do not count stop codon
         try
         {
-            this.count(0, lastThreeBytesFromLastLine[0],
+            this.count((byte) 0, lastThreeBytesFromLastLine[0],
                     lastThreeBytesFromLastLine[1], lastThreeBytesFromLastLine[2],
                     true);
         } catch(NucleotidException e)
