@@ -59,33 +59,6 @@ public class CDS {
 	 * @throws IOException
 	 *             if there is a problem reading the data
 	 */
-	/*public void add(String line) throws IOException {
-		StringReader reader = new StringReader(line);
-		int singleChar = reader.read();
-		while (singleChar != -1) {
-			if (dataPointer < data.length) {
-				// A = 65, C = 67, G = 71, T = 84
-				data[dataPointer] = (byte) singleChar;
-				singleChar = reader.read();
-				dataPointer++;
-			} else {
-				// CDS data does not correspond to what was expected according
-				// to the header. Setting the pointer to a value higher than the
-				// array length signals this, and prevents future data from
-				// being added
-				dataPointer = data.length + 1;
-			}
-		}
-		reader.close();
-	}*/
-
-	/**
-	 * Method that adds strings to the CDS data array
-	 *
-	 * @param line
-	 * @throws IOException
-	 *             if there is a problem reading the data
-	 */
 	public void add(String line) throws IOException {
 		// keep track of position in string
 		int position = 0;
@@ -172,40 +145,37 @@ public class CDS {
 		// 48 to 64
 		switch (first) {
 		case BASE_T:
-			index_of_trinucleotide += 16; break;
+			index_of_trinucleotide += 16;
 		case BASE_G:
-			index_of_trinucleotide += 16; break;
+			index_of_trinucleotide += 16;
 		case BASE_C:
-			index_of_trinucleotide += 16; break;
+			index_of_trinucleotide += 16;
 		case BASE_A:
 			break;
 		default: throw new NucleotidException();
-			// TODO throw exception
 		}
 		// xA: from 0 to 3 / 16 to 19 / 32 to 35 / 48 to 51
 		switch (second) {
 		case BASE_T:
-			index_of_trinucleotide += 4; break;
+			index_of_trinucleotide += 4;
 		case BASE_G:
-			index_of_trinucleotide += 4; break;
+			index_of_trinucleotide += 4;
 		case BASE_C:
-			index_of_trinucleotide += 4; break;
+			index_of_trinucleotide += 4;
 		case BASE_A:
 			break;
 		default: throw new NucleotidException();
-			// TODO throw exception
 		}
 		switch (third) {
 		case BASE_T:
-			index_of_trinucleotide++; break;
+			index_of_trinucleotide++;
 		case BASE_G:
-			index_of_trinucleotide++; break;
+			index_of_trinucleotide++;
 		case BASE_C:
-			index_of_trinucleotide++; break;
+			index_of_trinucleotide++;
 		case BASE_A:
 			break;
 		default: throw new NucleotidException();
-			// TODO throw exception
 		}
 		switch (phase) {
 		case 0:
@@ -233,71 +203,9 @@ public class CDS {
             try{
             this.count(phase, first, second, third, false);
             }catch(NucleotidException e)
-            {// what to do ???
+            {// TODO what to do ???
             }
 	}
-
-	/**
-	 * This method performs statistical analyses on the CDS data
-	 *
-	 * TODO This basic implementation writes some statistics to the standard
-	 * output
-	 *
-	 * However, the goal is that the method will eventually probably return
-	 * some object which can later be written to an Excel file so that the CDS
-	 * data itself can be deleted from memory
-	 */
-	/*
-	public void analyse() {
-		int freqA = 0;
-		int freqC = 0;
-		int freqG = 0;
-		int freqT = 0;
-
-		int i = 0;
-		outer: while (i < data.length) {
-			switch (data[i]) {
-			case BASE_A:
-				freqA++;
-				break;
-			case BASE_C:
-				freqC++;
-				break;
-			case BASE_G:
-				freqG++;
-				break;
-			case BASE_T:
-				freqT++;
-				break;
-			default:
-				break outer;
-			}
-			i++;
-		}
-
-		System.out.println("Frequencies of characters: A: " + freqA + ", C: "
-				+ freqC + ", G: " + freqG + ", T: " + freqT);
-	}*/
-
-    /** This method compute all trinucleotide occurence in each phase
-     * based on the data array
-     **/
-    /*public void analyse_trinucleotide()
-    {
-        int len = data.length;
-        int phase = 0;
-        //in the loop we start in the last elem of the phase 0 and we decrease
-        for(int i = 0; i <= len-4; i++)
-        {
-            //create the trinucleotide :simplification of real it's byte and not letter
-            byte [] trinucleotide = {data[i], data[i+1], data[i+2]};
-            // add one in the array/hashtable/object of the phase
-            // "phase" and the trinucleotide "trinucleotide"
-
-            //changing of phase
-            phase = (phase+1)%3;
-        }
-    }*/
 
 	/**
 	 * This method returns true if the CDS has been filled with exactly the
