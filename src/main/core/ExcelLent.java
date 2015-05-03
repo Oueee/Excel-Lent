@@ -13,7 +13,7 @@ import org.json.JSONObject;
 import gui.ProgressBarListener;
 import connection.GenomeManager;
 import util.Log;
-
+import excel.Excel_settings;
 
 public class ExcelLent implements Runnable {
     private static GenomeManager virusesManager;
@@ -77,6 +77,12 @@ public class ExcelLent implements Runnable {
             prokaryotesManager.AddSpeciesThreads(es, listener);
           }
 
+      while (es.getTaskCount() != es.getCompletedTaskCount())
+        Thread.sleep(5000);
+
+      es.shutdown();
+      es.awaitTermination(60, TimeUnit.SECONDS);
+      Excel_settings.agregate_excels()
         }catch(Exception e) {
             Log.e(e);
         }

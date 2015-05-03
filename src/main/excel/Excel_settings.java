@@ -324,7 +324,11 @@ public class Excel_settings {
 		return old_tab;
 	}
 
-	//Okay, not a very fun name aha
+	//Functions launched after all the epeces done.
+	//It agregate the leafs stats in node stats.
+	public static void agregate_excels() {
+		;
+	}
 	/**
 	 * List the difference to do in each file in the path.<br>
 	 * (for example in <b>SubGroup</b>, update [<b>Group</b>,<b>KingDom</b>])
