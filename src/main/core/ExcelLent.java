@@ -14,6 +14,7 @@ import gui.ProgressBarListener;
 import connection.GenomeManager;
 import util.Log;
 import excel.Excel_settings;
+import java.util.concurrent.TimeUnit;
 
 public class ExcelLent implements Runnable {
     private static GenomeManager virusesManager;
@@ -82,7 +83,7 @@ public class ExcelLent implements Runnable {
 
       es.shutdown();
       es.awaitTermination(60, TimeUnit.SECONDS);
-      Excel_settings.agregate_excels()
+      Excel_settings.agregate_excels();
         }catch(Exception e) {
             Log.e(e);
         }
