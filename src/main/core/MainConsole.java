@@ -25,10 +25,9 @@ public class MainConsole{
                         args[1].equals("1") ? true : false,
                         args[2].equals("1") ? true : false);
 
-      new Thread(excellent).start();
+      Thread t = new Thread(excellent).start();
 
-      while (true)
-        Thread.sleep(100000);
+      t.wait();
 
     } catch(Exception e) {
       Log.e(e);
