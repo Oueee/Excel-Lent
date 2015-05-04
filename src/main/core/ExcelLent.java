@@ -24,11 +24,18 @@ public class ExcelLent implements Runnable {
     private static boolean toDo[];
     private static boolean fine;
 
+    private static File project_root  = new File(System.getProperty("user.dir"));
+    public static File tree_root      = new File(project_root, "tree");
+    private static File urls_path     = new File(project_root, "urls_lists.json");
+
     	ThreadPoolExecutor es;
     	ProgressBarListener listener;
 
     	public ExcelLent(ProgressBarListener listener) {
     		this.listener = listener;
+
+        if(!tree_root.exists())
+          tree_root.mkdirs();
     	}
 
       public void setToDo(boolean v, boolean e, boolean p, boolean fine) {
@@ -44,19 +51,9 @@ public class ExcelLent implements Runnable {
 		ThreadPoolExecutor es = (ThreadPoolExecutor) Executors
 				.newFixedThreadPool(20);
 
-	    File project_root = new File(System.getProperty("user.dir"));
-
-	    File urls_path = new File(project_root, "urls_lists.json");
-	    File tree_root = new File(project_root, "tree");
-
         if(!urls_path.exists())
             Log.e("Doesn't find urls_lists.json file." +
             " Maybe you have to run the application from the " +
-            "root directory of the project.");
-
-        if(!tree_root.exists() || !tree_root.isDirectory())
-            Log.e("Doesn't root of the genome tree." +
-            " Maybe you have to the application from the " +
             "root directory of the project.");
 
         JSONObject urls = getUrls(urls_path);
@@ -81,10 +78,9 @@ public class ExcelLent implements Runnable {
             prokaryotesManager.AddSpeciesThreads(es, listener);
           }
 
-          while (es.getTaskCount() != es.getCompletedTaskCount()) {
+          while (es.getTaskCount() != es.getCompletedTaskCount())
             Thread.sleep(5000);
-            System.out.println("-");
-          }
+
           es.shutdown();
           es.awaitTermination(60, TimeUnit.SECONDS);
           Excel_settings.agregate_excels();

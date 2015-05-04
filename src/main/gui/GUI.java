@@ -26,7 +26,10 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.Box;
+import javax.swing.JRadioButton;
 import javax.swing.JCheckBox;
+import javax.swing.ButtonGroup;
+import java.awt.Component;
 
 import core.ExcelLent;
 
@@ -39,12 +42,16 @@ public class GUI  extends JFrame{
 	private JCheckBox p_cb;
 	private JCheckBox e_cb;
 
+	private JRadioButton fine;
+	private JRadioButton massive;
+
 	public GUI()
 	{
 		super("Excel-lent");
 		 this.background = new ImageIcon("img/wallpaperadn.PNG");
 	     this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	     JMenuBar menuBar = new JMenuBar();
+
+			JMenuBar menuBar = new JMenuBar();
 			GraphicsEnvironment env =
 	        GraphicsEnvironment.getLocalGraphicsEnvironment();
 	    	//this.setExtendedState(this.getExtendedState() | Frame.MAXIMIZED_BOTH);
@@ -62,23 +69,14 @@ public class GUI  extends JFrame{
 	        Global.lbl = label;
 	        final JProgressBar progressBar = new JProgressBar(0, 100);
 	        final ExcelLent excellent = new ExcelLent(new ProgressBarListener(progressBar));
-
-
-
-
+					FileTree tree = new FileTree(ExcelLent.tree_root);
+					JButton button = new JButton();
+					JButton b;
 
 	        ImagePanel panel = new ImagePanel(this.background.getImage());
 	        panel.repaint();
 	        panel.setLayout(new BorderLayout());
-			JButton button = new JButton(new AbstractAction("Run") {
-				public void actionPerformed(ActionEvent e) {
-					excellent.setToDo(v_cb.isSelected(),
-														e_cb.isSelected(),
-														p_cb.isSelected());
-					new Thread(excellent).start();
-					System.out.println("Executing excellent");
-			    }
-			});
+
 
 	        button.setVerticalTextPosition(AbstractButton.CENTER);
 	        button.setHorizontalTextPosition(AbstractButton.LEADING); //aka LEFT, for left-to-right locales
@@ -100,18 +98,12 @@ public class GUI  extends JFrame{
 	        //panel.add(progressBar,BorderLayout.SOUTH);
 	        //panel.add(panelGrid, BorderLayout.CENTER);
 
-	        try
-	        {
-	        	File rep = new File(System.getProperty("user.dir")+"\tree");
-	        	explore =  new Explorer(rep.listFiles());
-	        }
-	        catch (NullPointerException e)
-	        {
-	        	explore = new Explorer();
-	        }
+					explore =  new Explorer(ExcelLent.tree_root.listFiles());
+
 
 					Box main = Box.createVerticalBox();
 					Box choice = Box.createHorizontalBox();
+					choice.setAlignmentX(Component.LEFT_ALIGNMENT);
 						v_cb = new JCheckBox("Viruses");
 						v_cb.setSelected(true);
 						choice.add(v_cb);
@@ -124,12 +116,39 @@ public class GUI  extends JFrame{
 						p_cb.setSelected(false);
 						choice.add(p_cb);
 
-						choice.add(Global.btn_run);
+						ButtonGroup group = new ButtonGroup();
+							fine = new JRadioButton("fine");
+							fine.setSelected(true);
+							group.add(fine);
 
-					main.add(explore);
+							massive = new JRadioButton("massive");
+							group.add(massive);
+
+						choice.add(Box.createHorizontalStrut(25));
+						choice.add(fine);
+						choice.add(massive);
+						choice.add(Box.createHorizontalStrut(25));
+
+					b = new JButton(new AbstractAction("Run") {
+						public void actionPerformed(ActionEvent e) {
+							excellent.setToDo(v_cb.isSelected(),
+																e_cb.isSelected(),
+																p_cb.isSelected(),
+																fine.isSelected());
+							new Thread(excellent).start();
+							}
+					});
+					choice.add(b);
+					b = new JButton(new AbstractAction("Refresh tree") {
+						public void actionPerformed(ActionEvent e) {
+							tree.refresh();
+							}
+					});
+					choice.add(b);
+
+					main.add(tree);
 					main.add(choice);
 					main.add(progressBar);
-
 
 	        explore.setAutoscrolls(true);
 	        //panel.add(explore, BorderLayout.WEST);
@@ -139,7 +158,7 @@ public class GUI  extends JFrame{
 	        //Display the window.
 	        //this.pack();
 	        //frame.setSize(500, 300);
-					this.setSize(300, 120);
+					this.setSize(700, 500);
 	        this.setLocationRelativeTo(null);
 	        this.setVisible(true);
 

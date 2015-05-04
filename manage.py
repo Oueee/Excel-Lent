@@ -10,7 +10,8 @@ import shutil
 
 attributs = {
     'flags': '-g',# -Xlint:all',
-    'main_class': 'core.MainConsole'#'gui.GUI', #'excel.Excel_settings'
+    #'main_class': 'core.MainConsole'
+    'main_class': 'gui.GUI', #'excel.Excel_settings'
 }
 
 ### compile parts
