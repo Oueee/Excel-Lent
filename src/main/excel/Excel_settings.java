@@ -32,6 +32,7 @@ public class Excel_settings {
 	// Attributes
 
 	public static String extension = ".xls";
+
 	/**
 	 * The current Workbook.
 	 * @see Excel_settings#Excel_settings(File, ArrayList)
@@ -84,6 +85,12 @@ public class Excel_settings {
 		table = path;
 	}
 
+
+		//Functions launched after all the epeces done.
+	//It agregate the leafs stats in node stats.
+	public static void agregate_excels() {
+		;
+	}
 	// Create
 	/**
 	 * Create a new xls with the number of each nucleotide.
@@ -326,11 +333,7 @@ public class Excel_settings {
 		return old_tab;
 	}
 
-	//Functions launched after all the epeces done.
-	//It agregate the leafs stats in node stats.
-	public static void agregate_excels() {
-		;
-	}
+	//Okay, not a very fun name aha
 	/**
 	 * List the difference to do in each file in the path.<br>
 	 * (for example in <b>SubGroup</b>, update [<b>Group</b>,<b>KingDom</b>])

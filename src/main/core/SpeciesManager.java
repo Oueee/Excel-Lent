@@ -150,6 +150,7 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 													 (String) specie.get("group"),
 													 (String) specie.get("subGroup"),
 													 (String) specie.get("name"),
-													 ((String) specie.get("bioProject")) + Excel_settings.extension);
+													 (String) specie.get("bioProject"),
+													 "stats"+ Excel_settings.extension);
 	}
 }

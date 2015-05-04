@@ -6,7 +6,7 @@ import java.net.URL;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.net.UnknownHostException;
-
+import java.util.concurrent.TimeUnit;
 
 import org.json.JSONObject;
 import org.json.JSONObject;
@@ -14,34 +14,35 @@ import gui.ProgressBarListener;
 import connection.GenomeManager;
 import util.Log;
 import excel.Excel_settings;
-import java.util.concurrent.TimeUnit;
 
-public class ExcelLent extends Thread {
+
+
+public class ExcelLent implements Runnable {
     private static GenomeManager virusesManager;
     private static GenomeManager eukaryotesManager;
     private static GenomeManager prokaryotesManager;
     private static boolean toDo[];
     private static boolean fine;
 
-	ThreadPoolExecutor es;
-	ProgressBarListener listener;
+    	ThreadPoolExecutor es;
+    	ProgressBarListener listener;
 
-	public ExcelLent(ProgressBarListener listener) {
-		this.listener = listener;
-	}
+    	public ExcelLent(ProgressBarListener listener) {
+    		this.listener = listener;
+    	}
 
-  public void setToDo(boolean v, boolean e, boolean p, boolean fine) {
-    this.toDo = new boolean[3];
-    toDo[0] = v;
-    toDo[1] = e;
-    toDo[2] = p;
-    this.fine = fine;
-  }
+      public void setToDo(boolean v, boolean e, boolean p, boolean fine) {
+        this.toDo = new boolean[3];
+        toDo[0] = v;
+        toDo[1] = e;
+        toDo[2] = p;
+        this.fine = fine;
+      }
 
 	@Override
 	public void run() {
 		ThreadPoolExecutor es = (ThreadPoolExecutor) Executors
-				.newFixedThreadPool(1);
+				.newFixedThreadPool(20);
 
 	    File project_root = new File(System.getProperty("user.dir"));
 
@@ -80,12 +81,14 @@ public class ExcelLent extends Thread {
             prokaryotesManager.AddSpeciesThreads(es, listener);
           }
 
-      while (es.getTaskCount() != es.getCompletedTaskCount())
-        Thread.sleep(5000);
+          while (es.getTaskCount() != es.getCompletedTaskCount()) {
+            Thread.sleep(5000);
+            System.out.println("-");
+          }
+          es.shutdown();
+          es.awaitTermination(60, TimeUnit.SECONDS);
+          Excel_settings.agregate_excels();
 
-      es.shutdown();
-      es.awaitTermination(60, TimeUnit.SECONDS);
-      Excel_settings.agregate_excels();
         }catch(Exception e) {
             Log.e(e);
         }

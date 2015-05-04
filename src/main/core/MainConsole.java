@@ -17,13 +17,19 @@ public class MainConsole{
       final JProgressBar progressBar = new JProgressBar(0, 100);
       final ExcelLent excellent = new ExcelLent(new ProgressBarListener(progressBar));
 
+      Log.i("#########################");
+      Log.i("/!\\ Stop with a ^C... /!\\");
+      Log.i("#########################");
+
       excellent.setToDo(args[0].equals("1") ? true : false,
                         args[1].equals("1") ? true : false,
                         args[2].equals("1") ? true : false,
                         args[3].equals("1") ? true : false);
 
-      excellent.start();
-      excellent.join();
+      new Thread(excellent).start();
+
+      while (true)
+        Thread.sleep(100000);
 
     } catch(Exception e) {
       Log.e(e);

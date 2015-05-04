@@ -27,9 +27,6 @@ import javax.swing.JProgressBar;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.Box;
 import javax.swing.JCheckBox;
-import javax.swing.JRadioButton;
-import javax.swing.ButtonGroup;
-import java.awt.Component;
 
 import core.ExcelLent;
 
@@ -41,9 +38,6 @@ public class GUI  extends JFrame{
 	private JCheckBox v_cb;
 	private JCheckBox p_cb;
 	private JCheckBox e_cb;
-
-	private JRadioButton fine;
-	private JRadioButton massive;
 
 	public GUI()
 	{
@@ -80,9 +74,9 @@ public class GUI  extends JFrame{
 				public void actionPerformed(ActionEvent e) {
 					excellent.setToDo(v_cb.isSelected(),
 														e_cb.isSelected(),
-														p_cb.isSelected(),
-														fine.isSelected());
-					excellent.start();
+														p_cb.isSelected());
+					new Thread(excellent).start();
+					System.out.println("Executing excellent");
 			    }
 			});
 
@@ -118,7 +112,6 @@ public class GUI  extends JFrame{
 
 					Box main = Box.createVerticalBox();
 					Box choice = Box.createHorizontalBox();
-					choice.setAlignmentX(Component.LEFT_ALIGNMENT);
 						v_cb = new JCheckBox("Viruses");
 						v_cb.setSelected(true);
 						choice.add(v_cb);
@@ -131,16 +124,6 @@ public class GUI  extends JFrame{
 						p_cb.setSelected(false);
 						choice.add(p_cb);
 
-						ButtonGroup group = new ButtonGroup();
-							fine = new JRadioButton("fine");
-							fine.setSelected(true);
-							group.add(fine);
-
-							massive = new JRadioButton("massive");
-							group.add(massive);
-
-						choice.add(fine);
-						choice.add(massive);
 						choice.add(Global.btn_run);
 
 					main.add(explore);
@@ -156,7 +139,7 @@ public class GUI  extends JFrame{
 	        //Display the window.
 	        //this.pack();
 	        //frame.setSize(500, 300);
-					this.setSize(500, 120);
+					this.setSize(300, 120);
 	        this.setLocationRelativeTo(null);
 	        this.setVisible(true);
 
