@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.io.File;
 import java.io.FileInputStream;
@@ -48,14 +49,15 @@ public class GenomeManager {
 	private File root_path;
 	private File list_species;
 	private URL url;
+	private boolean fine;
 
 	private static final int BUFFER_SIZE = 4096;
 
-	public GenomeManager (File root_path, URL url) {
+	public GenomeManager (File root_path, URL url, boolean fine) {
         this.root_path = root_path;
         this.list_species = new File(this.root_path, "done.json");
         this.url = url;
-
+				this.fine = fine;
         //If it's the first run, we initialize it
 		if(!this.root_path.exists()) {
 		    Log.i("create the kingdom " + this.root_path.getName());
@@ -65,9 +67,6 @@ public class GenomeManager {
 		}
   }
 
-	public void parsed(String name) {
-    ;
-  }
 
     public void AddSpeciesThreads(ThreadPoolExecutor es,
                                                 ProgressBarListener listener){
@@ -239,6 +238,8 @@ public class GenomeManager {
                 regex.put("group", i);
             else if(elt.equals("SubGroup"))
                 regex.put("subGroup", i);
+						else if(elt.equals("BioProject"))
+							regex.put("bioProject", i);
         }
 
         return regex;
@@ -252,6 +253,8 @@ public class GenomeManager {
      * remove it from the old one (the species which is still in at the end
      * must be remove )
      */
+
+		//TODO gestion de plusieurs bioproject si analyse massive
     private boolean isToDo(JSONObject oldSpecies,
                              JSONObject newSpecies,
                              Map specie) {
@@ -260,33 +263,33 @@ public class GenomeManager {
         String modify_date = specie.get("modify_date").toString();
         String group= specie.get("group").toString();
         String subGroup = specie.get("subGroup").toString();
-
+				String bioProject = (String)specie.get("bioProject");
         boolean toDo = false;
 
-        Map<String,String> specie_saved = new HashMap<String,String>();
+				LinkedHashMap<String,String> specie_saved;
         JSONObject old_specie;
 
         //If we have already done this specie
-        if(newSpecies.has(name))
+        if(fine && newSpecies.has(name))
             return false;
 
 				//If the specie hasn't any replicons, do nothing
 				if(((Set<String>)specie.get("replicons")).size() <= 0)
 					return false;
 
-        specie_saved.put("modify_date", modify_date);
-        newSpecies.put(name, specie_saved);
+
 
         File path_specie = PathUtils.child(this.root_path,
                                           (String)specie.get("group"),
                                           (String)specie.get("subGroup"),
-                                          name);
+                                          name,
+																					bioProject);
 
 				File path_replicon;
 
         if(!oldSpecies.has(name)) {
 						for(String replicon : (Set<String>)specie.get("replicons")) {
-							path_replicon = new File(path_specie, replicon);
+							path_replicon = util.PathUtils.child(path_specie, replicon);
 							path_replicon.mkdirs();
 						}
 						SpeciesManager.toDo(this.root_path, specie);
@@ -301,20 +304,42 @@ public class GenomeManager {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
             old_specie = (JSONObject) oldSpecies.get(name);
             try{
-                Date oldDate = sdf.parse((String)old_specie.get("modify_date"));
+                Date oldDate = sdf.parse((String)old_specie.get(bioProject));
                 Date currentDate = sdf.parse(modify_date);
 
 							//If it's a new one or
 							//If we stoped before to parse the sepcie
 							//do it again.
-            	if(currentDate.compareTo(oldDate) > 0 || !SpeciesManager.isDone(this.root_path , specie)) {
+            	if(currentDate.compareTo(oldDate) > 0)
 								SpeciesManager.toDo(this.root_path, specie);
+
+							if(!SpeciesManager.isDone(this.root_path , specie)) {
                 toDo = true;
 							}
             } catch(ParseException e) {}
 
-            oldSpecies.remove(name);
+						//We remove the bio project to do
+						old_specie.remove(bioProject);
+
+						//If it was the last one, we remove the name of the specie
+						//Otherwise we update it
+						if(old_specie.length() == 0)
+							oldSpecies.remove(name);
+						else
+							oldSpecies.put(name, old_specie);
         }
+
+				if(newSpecies.has(name)) {
+					specie_saved = (LinkedHashMap<String,String>)newSpecies.get(name);
+					//If we already done a bio project with the massive analyse
+					if(specie_saved.containsValue(bioProject))
+						return false;
+				}
+				else
+					specie_saved = new LinkedHashMap<String,String>();
+
+				specie_saved.put(bioProject, modify_date);
+				newSpecies.put(name, specie_saved);
 
         return toDo;
     }

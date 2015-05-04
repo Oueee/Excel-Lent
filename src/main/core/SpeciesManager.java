@@ -68,6 +68,7 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 		path.add((String)specieInfos.get("group"));
 		path.add((String)specieInfos.get("subGroup"));
 		path.add((String)specieInfos.get("name"));
+		path.add((String)specieInfos.get("bioProject"));
 
 		File path_specie = PathUtils.child_from_list(kingdomDir, path);
 		File path_replicon;
@@ -78,14 +79,11 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 		path.add(0, kingdomDir.getName());
 		for (String repliconID : (Set<String>) specieInfos.get("replicons")) {
 			path.add(repliconID);
-			done_file 		= PathUtils.child(path_specie, repliconID, "done.json");
 
+			path_replicon = PathUtils.child(path_specie, repliconID, "stats" + Excel_settings.extension);
 			//If we did it, we pass at the next one
-			if(done_file.exists())
+			if(path_replicon.exists())
 				continue;
-
-
-			path_replicon = PathUtils.child(path_specie, repliconID, "fine.xls");
 
 			result 				= connector.downloadAndAnalyseReplicon(repliconID);
 			es		 				= new Excel_settings(path_replicon, path);
@@ -97,15 +95,7 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 												 result.getNoCdsTraitees(),
 												 result.getNoCdsNonTraitees());
 
-			done_file.createNewFile();
-
 			path.remove(path.size()-1);
-		}
-		//If the thread bug before this part
-		//only the good replicons will be done after that
-		for (String repliconID : (Set<String>) specieInfos.get("replicons")) {
-			done_file = PathUtils.child(path_specie, repliconID, "done.json");
-			done_file.delete();
 		}
 	}	catch(Exception e){
 			Log.e(e);
@@ -160,6 +150,6 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 													 (String) specie.get("group"),
 													 (String) specie.get("subGroup"),
 													 (String) specie.get("name"),
-													 "done.json");
+													 ((String) specie.get("bioProject")) + Excel_settings.extension);
 	}
 }
