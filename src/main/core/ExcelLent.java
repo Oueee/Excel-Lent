@@ -6,13 +6,15 @@ import java.net.URL;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.net.UnknownHostException;
-
+import java.util.concurrent.TimeUnit;
 
 import org.json.JSONObject;
 import org.json.JSONObject;
 import gui.ProgressBarListener;
 import connection.GenomeManager;
 import util.Log;
+import excel.Excel_settings;
+
 
 
 public class ExcelLent implements Runnable {
@@ -78,6 +80,14 @@ public class ExcelLent implements Runnable {
                                     new URL(urls.get("Prokaryote").toString()), fine);
             prokaryotesManager.AddSpeciesThreads(es, listener);
           }
+
+          while (es.getTaskCount() != es.getCompletedTaskCount()) {
+            Thread.sleep(5000);
+            System.out.println("-");
+          }
+          es.shutdown();
+          es.awaitTermination(60, TimeUnit.SECONDS);
+          Excel_settings.agregate_excels();
 
         }catch(Exception e) {
             Log.e(e);

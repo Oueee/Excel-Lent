@@ -32,7 +32,7 @@ public class Excel_settings {
 	// Attributes
 
 	public static String extension = ".xls";
-	
+
 	/**
 	 * The current Workbook.
 	 * @see Excel_settings#Excel_settings(File, ArrayList)
@@ -85,6 +85,12 @@ public class Excel_settings {
 		table = path;
 	}
 
+
+		//Functions launched after all the epeces done.
+	//It agregate the leafs stats in node stats.
+	public static void agregate_excels() {
+		;
+	}
 	// Create
 	/**
 	 * Create a new xls with the number of each nucleotide.
