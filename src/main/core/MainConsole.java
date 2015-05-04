@@ -7,8 +7,8 @@ import gui.ProgressBarListener;
 
 public class MainConsole{
   public static void main(String[] args) {
-    if(args.length < 3) {
-      Log.e("\narguments to give: 0|1 0|1 0|1\n1 to do it, 0 to do not.\nviruses eukaryotes prokaryotes");
+    if(args.length < 4) {
+      Log.e("\narguments to give: 0|1 0|1 0|1 0|1\n1 to do it, 0 to do not.\nviruses eukaryotes prokaryotes massive|fine");
       Log.e("Enjoy ;)");
       Log.exit();
     }
@@ -23,7 +23,8 @@ public class MainConsole{
 
       excellent.setToDo(args[0].equals("1") ? true : false,
                         args[1].equals("1") ? true : false,
-                        args[2].equals("1") ? true : false);
+                        args[2].equals("1") ? true : false,
+                        args[3].equals("1") ? true : false);
 
       new Thread(excellent).start();
 

@@ -32,7 +32,7 @@ public class PathUtils {
             for(final String pathElement : pathElements)
             {
                 builder.append(File.separator);
-                builder.append(pathElement.replace('/', '-'));
+                builder.append(pathElement.replaceAll("(\\W)+", "_"));
             }
 
             result = new File(base, builder.toString());
@@ -56,7 +56,7 @@ public class PathUtils {
             for(final String pathElement : pathElements)
             {
                 builder.append(File.separator);
-                builder.append(pathElement.replace('/', '-'));
+                builder.append(pathElement.replaceAll("(\\W)+", "_"));
             }
 
             result = new File(base, builder.toString());
