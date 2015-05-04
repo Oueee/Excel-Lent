@@ -30,6 +30,9 @@ import util.Log;
  */
 public class Excel_settings {
 	// Attributes
+
+	public static String extension = ".xls";
+	
 	/**
 	 * The current Workbook.
 	 * @see Excel_settings#Excel_settings(File, ArrayList)

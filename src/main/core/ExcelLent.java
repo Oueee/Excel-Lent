@@ -20,20 +20,22 @@ public class ExcelLent implements Runnable {
     private static GenomeManager eukaryotesManager;
     private static GenomeManager prokaryotesManager;
     private static boolean toDo[];
+    private static boolean fine;
 
-	ThreadPoolExecutor es;
-	ProgressBarListener listener;
+    	ThreadPoolExecutor es;
+    	ProgressBarListener listener;
 
-	public ExcelLent(ProgressBarListener listener) {
-		this.listener = listener;
-	}
+    	public ExcelLent(ProgressBarListener listener) {
+    		this.listener = listener;
+    	}
 
-  public void setToDo(boolean v, boolean e, boolean p) {
-    this.toDo = new boolean[3];
-    toDo[0] = v;
-    toDo[1] = e;
-    toDo[2] = p;
-  }
+      public void setToDo(boolean v, boolean e, boolean p, boolean fine) {
+        this.toDo = new boolean[3];
+        toDo[0] = v;
+        toDo[1] = e;
+        toDo[2] = p;
+        this.fine = fine;
+      }
 
 	@Override
 	public void run() {
@@ -61,19 +63,19 @@ public class ExcelLent implements Runnable {
           if(toDo[0]) {
             Log.i("Checking viruses");
             virusesManager = new GenomeManager(new File(tree_root, "Viruses"),
-                                    new URL(urls.get("Viruses").toString()));
+                                    new URL(urls.get("Viruses").toString()), fine);
             virusesManager.AddSpeciesThreads(es, listener);
           }
           if(toDo[1]) {
             Log.i("Checking eukaryotes");
             eukaryotesManager = new GenomeManager(new File(tree_root, "Eukaryotes"),
-                                    new URL(urls.get("Eukaryotes").toString()));
+                                    new URL(urls.get("Eukaryotes").toString()), fine);
             eukaryotesManager.AddSpeciesThreads(es, listener);
           }
           if(toDo[2]) {
             Log.i("Checking prokaryote");
             prokaryotesManager = new GenomeManager(new File(tree_root, "Prokaryote"),
-                                    new URL(urls.get("Prokaryote").toString()));
+                                    new URL(urls.get("Prokaryote").toString()), fine);
             prokaryotesManager.AddSpeciesThreads(es, listener);
           }
 
