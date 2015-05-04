@@ -97,7 +97,11 @@ public final class Log {
 	public static final void e(Exception e) {
 		if(DEBUG_MODE)
 		{
-			printMessage(e.getMessage(), type.ERROR);
+			if(e.getMessage() == null)
+				printMessage(new String(), type.ERROR);
+			else
+				printMessage(e.getMessage(), type.ERROR);
+
 			e.printStackTrace();
 		}
 		else

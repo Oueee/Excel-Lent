@@ -16,7 +16,7 @@ import util.Log;
 import excel.Excel_settings;
 import java.util.concurrent.TimeUnit;
 
-public class ExcelLent implements Runnable {
+public class ExcelLent extends Thread {
     private static GenomeManager virusesManager;
     private static GenomeManager eukaryotesManager;
     private static GenomeManager prokaryotesManager;

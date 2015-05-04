@@ -82,8 +82,7 @@ public class GUI  extends JFrame{
 														e_cb.isSelected(),
 														p_cb.isSelected(),
 														fine.isSelected());
-					new Thread(excellent).start();
-					System.out.println("Executing excellent");
+					excellent.start();
 			    }
 			});
 
