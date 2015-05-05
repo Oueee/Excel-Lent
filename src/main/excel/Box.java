@@ -30,5 +30,15 @@ public class Box {
     this.nCds += b.nCds;
     this.nCdsNot += b.nCdsNot;
     this.nbNucleotides += b.nbNucleotides;
+    TreeMap<String, Integer> t;
+    TreeMap<String, Integer> a;
+
+    for(int i = 0; i < l.size(); i++) {
+      t = b.l.get(i);
+      a = this.l.get(i);
+
+      for(String key : a.keySet())
+        a.put(key, a.get(key) + t.get(key));
+    }
   }
 }
