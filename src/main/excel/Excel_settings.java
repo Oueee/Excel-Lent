@@ -23,6 +23,8 @@ import org.apache.poi.ss.util.WorkbookUtil;
 
 import util.Log;
 import core.ExcelLent;
+import statistics.AnalysisResults;
+import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
 
 /**
  * Class to manage the Excel (create/update).
@@ -99,7 +101,27 @@ public class Excel_settings {
 	}
 
 	public Box get_infos() {
-		return null;
+		Sheet sheet1 = wb.getSheetAt(0);
+		
+		List<TreeMap<String,Integer>> list = new ArrayList<TreeMap<String,Integer>> (3);
+		
+		
+		int nbcds = (int)sheet1.getRow(2).getCell(1).getNumericCellValue();
+		int nbcds_no = (int)sheet1.getRow(4).getCell(1).getNumericCellValue();
+		int trinucle = (int)sheet1.getRow(3).getCell(1).getNumericCellValue();
+		
+		for (int j = 0,k=1 ; j < 3 ; j++,k+=2)
+		{
+			TreeMap<String, Integer> m = new TreeMap<String,Integer>();
+			for (int i = 7 ; i < AnalysisResults.CDS_STRINGS.length + 7 ; i++)
+			{
+				double nb = sheet1.getRow(i).getCell(k).getNumericCellValue();
+				m.put(AnalysisResults.CDS_STRINGS[i-7], (int)nb);
+			}
+			list.add(m);	
+		}
+			
+		return new Box(list,nbcds,nbcds_no,trinucle);
 	}
 
 	public static Box agregate_aux(Excel_settings es) {

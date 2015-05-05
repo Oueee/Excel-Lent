@@ -6,7 +6,7 @@ import java.util.TreeMap;
 
 public class AnalysisResults {
 
-	private static final String[] CDS_STRINGS = { "AAA", "AAC", "AAG", "AAT", "ACA",
+	public static final String[] CDS_STRINGS = { "AAA", "AAC", "AAG", "AAT", "ACA",
 		"ACC", "ACG", "ACT", "AGA", "AGC", "AGG", "AGT", "ATA", "ATC",
 		"ATG", "ATT", "CAA", "CAC", "CAG", "CAT", "CCA", "CCC", "CCG",
 		"CCT", "CGA", "CGC", "CGG", "CGT", "CTA", "CTC", "CTG", "CTT",
