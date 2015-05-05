@@ -26,6 +26,7 @@ public class Box {
     this.nbNucleotides = nbNucleotides;
   }
 
+  public Box() {};
   public void add(Box b) {
     this.nCds += b.nCds;
     this.nCdsNot += b.nCdsNot;

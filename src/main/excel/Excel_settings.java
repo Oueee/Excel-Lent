@@ -24,7 +24,6 @@ import org.apache.poi.ss.util.WorkbookUtil;
 import util.Log;
 import core.ExcelLent;
 import statistics.AnalysisResults;
-import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
 
 /**
  * Class to manage the Excel (create/update).
@@ -102,14 +101,14 @@ public class Excel_settings {
 
 	public Box get_infos() {
 		Sheet sheet1 = wb.getSheetAt(0);
-		
+
 		List<TreeMap<String,Integer>> list = new ArrayList<TreeMap<String,Integer>> (3);
-		
-		
+
+
 		int nbcds = (int)sheet1.getRow(2).getCell(1).getNumericCellValue();
 		int nbcds_no = (int)sheet1.getRow(4).getCell(1).getNumericCellValue();
 		int trinucle = (int)sheet1.getRow(3).getCell(1).getNumericCellValue();
-		
+
 		for (int j = 0,k=1 ; j < 3 ; j++,k+=2)
 		{
 			TreeMap<String, Integer> m = new TreeMap<String,Integer>();
@@ -118,21 +117,30 @@ public class Excel_settings {
 				double nb = sheet1.getRow(i).getCell(k).getNumericCellValue();
 				m.put(AnalysisResults.CDS_STRINGS[i-7], (int)nb);
 			}
-			list.add(m);	
+			list.add(m);
 		}
-			
+
 		return new Box(list,nbcds,nbcds_no,trinucle);
 	}
 
-	public static Box agregate_aux(Excel_settings es) {
-		if(es.f.isFile())
-			return es.get_infos();
-
-		File[] fList = es.f.listFiles();
-		for (File file : fList) {
-			;
+	public static Box agregate_aux(Excel_settings es) throws InvalidFormatException, IOException {
+		if(es.f.isFile()) {
+			if(es.f.exists())
+				return es.get_infos();
+			else
+				return new Box();
 		}
-		return null;
+
+		Box b = new Box();
+		for (File file : es.f.listFiles())
+			b.add(agregate_aux(new Excel_settings(file)));
+
+
+		if(es.f.exists())
+			es.f.delete();
+
+			//create excel
+		return b;
 	}
 	// Create
 	/**
