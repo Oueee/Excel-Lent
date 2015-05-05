@@ -22,6 +22,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.WorkbookUtil;
 
 import util.Log;
+import core.ExcelLent;
+
 /**
  * Class to manage the Excel (create/update).
  * @author mjeremy
@@ -85,11 +87,30 @@ public class Excel_settings {
 		table = path;
 	}
 
+	public Excel_settings (File f) throws InvalidFormatException, IOException {
+		this(f, null);
+	}
+
 
 		//Functions launched after all the epeces done.
 	//It agregate the leafs stats in node stats.
-	public static void agregate_excels() {
-		;
+	public static void agregate_excels() throws InvalidFormatException, IOException{
+		agregate_aux(new Excel_settings(ExcelLent.tree_root));
+	}
+
+	public Box get_infos() {
+		return null;
+	}
+
+	public static Box agregate_aux(Excel_settings es) {
+		if(es.f.isFile())
+			return es.get_infos();
+
+		File[] fList = es.f.listFiles();
+		for (File file : fList) {
+			;
+		}
+		return null;
 	}
 	// Create
 	/**
