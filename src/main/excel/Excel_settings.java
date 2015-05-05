@@ -109,7 +109,7 @@ public class Excel_settings {
 		int nbcds_no = (int)sheet1.getRow(4).getCell(1).getNumericCellValue();
 		int trinucle = (int)sheet1.getRow(3).getCell(1).getNumericCellValue();
 
-		for (int j = 0,k=1 ; j < 3 ; j++,k+=2)
+		for (int k=1 ; k < 6 ; k+=2)
 		{
 			TreeMap<String, Integer> m = new TreeMap<String,Integer>();
 			for (int i = 7 ; i < AnalysisResults.CDS_STRINGS.length + 7 ; i++)
