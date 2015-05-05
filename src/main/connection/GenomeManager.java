@@ -303,24 +303,27 @@ public class GenomeManager {
         else {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
             old_specie = (JSONObject) oldSpecies.get(name);
-            try{
-                Date oldDate = sdf.parse((String)old_specie.get(bioProject));
-                Date currentDate = sdf.parse(modify_date);
+						if(old_specie.has(bioProject))
+						{
+							try{
+	                Date oldDate = sdf.parse((String)old_specie.get(bioProject));
+	                Date currentDate = sdf.parse(modify_date);
 
-							//If it's a new one or
-							//If we stoped before to parse the sepcie
-							//do it again.
-            	if(currentDate.compareTo(oldDate) > 0)
-								SpeciesManager.toDo(this.root_path, specie);
+								//If it's a new one or
+								//If we stoped before to parse the sepcie
+								//do it again.
+	            	if(currentDate.compareTo(oldDate) > 0)
+									SpeciesManager.toDo(this.root_path, specie);
 
-							if(!SpeciesManager.isDone(this.root_path , specie)) {
-                toDo = true;
-							}
-            } catch(ParseException e) {}
+								if(!SpeciesManager.isDone(this.root_path , specie)) {
+	                toDo = true;
+								}
+	            } catch(ParseException e) {}
 
-						//We remove the bio project to do
-						old_specie.remove(bioProject);
-
+							//We remove the bio project to do
+							old_specie.remove(bioProject);
+						}
+          
 						//If it was the last one, we remove the name of the specie
 						//Otherwise we update it
 						if(old_specie.length() == 0)
