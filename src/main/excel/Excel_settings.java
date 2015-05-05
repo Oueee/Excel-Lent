@@ -2,6 +2,7 @@ package excel;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.channels.FileLock;
 import java.nio.channels.FileChannel;
@@ -20,8 +21,10 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.WorkbookUtil;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import util.Log;
+import util.PathUtils;
 import core.ExcelLent;
 import statistics.AnalysisResults;
 
@@ -88,18 +91,14 @@ public class Excel_settings {
 		table = path;
 	}
 
-	public Excel_settings (File f) throws InvalidFormatException, IOException {
-		this(f, null);
-	}
-
-
 		//Functions launched after all the epeces done.
 	//It agregate the leafs stats in node stats.
 	public static void agregate_excels() throws InvalidFormatException, IOException{
-		agregate_aux(new Excel_settings(ExcelLent.tree_root));
+		agregate_aux(new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()));
 	}
 
 	public Box get_infos() {
+		Log.d(f);
 		Sheet sheet1 = wb.getSheetAt(0);
 
 		List<TreeMap<String,Integer>> list = new ArrayList<TreeMap<String,Integer>> (3);
@@ -125,21 +124,42 @@ public class Excel_settings {
 
 	public static Box agregate_aux(Excel_settings es) throws InvalidFormatException, IOException {
 		if(es.f.isFile()) {
-			if(es.f.exists())
-				return es.get_infos();
+			if(es.f.exists()) {
+				FileInputStream inp = new FileInputStream(es.f);
+				es.wb = WorkbookFactory.create(inp);
+				Box bb = es.get_infos();
+				inp.close();
+				return bb;
+			}
 			else
 				return new Box();
 		}
 
 		Box b = new Box();
-		for (File file : es.f.listFiles())
-			b.add(agregate_aux(new Excel_settings(file)));
+
+		for (File file : es.f.listFiles()) {
+			ArrayList<String> path = es.table;
+			path.add(file.getName());
+			b.add(agregate_aux(new Excel_settings(file, path)));
+		}
+
+		//Don't do the root
+		if(es.f.getName().equals(ExcelLent.tree_root.getName()))
+			return null;
 
 
+		es.f = util.PathUtils.child(es.f, "stats" + extension);
 		if(es.f.exists())
 			es.f.delete();
 
-			//create excel
+		es.f.createNewFile();
+
+		FileOutputStream fileout = new FileOutputStream(es.f);
+		es.new_excel(b.l,b.nCds, b.nCdsNot, b.nbNucleotides);
+
+		es.wb.write(fileout);
+		fileout.close();
+
 		return b;
 	}
 	// Create
@@ -217,6 +237,7 @@ public class Excel_settings {
 		cell = row.createCell(6);
 		cell.setCellStyle(cellStyle);
 		cell.setCellValue("Pb Ph2");
+
 
 		// Key of map
 		i = 7;
@@ -344,6 +365,7 @@ public class Excel_settings {
 				cell.setCellValue(entry.getValue());
 			}
 
+			Log.d(j);
 			Row row = sheet1.getRow(max+1);
 			Cell cell = row.createCell(j);
 			String letter = phases[phase++];

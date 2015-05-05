@@ -9,11 +9,11 @@ import java.util.List;
 
 public class Box {
 
-  public List<TreeMap<String, Integer>> l = new ArrayList<TreeMap<String, Integer>>(3);
+  public List<TreeMap<String, Integer>> l;
 
-	public int nCds = 0;
-	public int nCdsNot = 0;
-  public int nbNucleotides = 0;
+	public int nCds;
+	public int nCdsNot;
+  public int nbNucleotides;
 
   public Box(List<TreeMap<String, Integer>> l,
              int noCdsTraitees,
@@ -26,7 +26,18 @@ public class Box {
     this.nbNucleotides = nbNucleotides;
   }
 
-  public Box() {};
+  public Box() {
+    l = new ArrayList<TreeMap<String, Integer>>();
+
+    for(int i = 0; i < 3; i++)
+      l.add(new TreeMap<String, Integer>());
+
+
+  	nCds = 0;
+  	nCdsNot = 0;
+    nbNucleotides = 0;
+
+  };
   public void add(Box b) {
     this.nCds += b.nCds;
     this.nCdsNot += b.nCdsNot;

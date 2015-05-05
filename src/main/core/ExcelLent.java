@@ -59,6 +59,7 @@ public class ExcelLent implements Runnable {
         JSONObject urls = getUrls(urls_path);
 
         try{
+          /*
           if(toDo[0]) {
             Log.i("Checking viruses");
             virusesManager = new GenomeManager(new File(tree_root, "Viruses"),
@@ -83,11 +84,13 @@ public class ExcelLent implements Runnable {
 
           es.shutdown();
           es.awaitTermination(60, TimeUnit.SECONDS);
+          */
           Excel_settings.agregate_excels();
-
         }catch(Exception e) {
-            Log.e(e);
+          e.printStackTrace();
+            //Log.e(e);
         }
+
 	}
 
 
