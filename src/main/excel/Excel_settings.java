@@ -3,10 +3,14 @@ package excel;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.IOException;
 import java.nio.channels.FileLock;
 import java.nio.channels.FileChannel;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -94,11 +98,10 @@ public class Excel_settings {
 		//Functions launched after all the epeces done.
 	//It agregate the leafs stats in node stats.
 	public static void agregate_excels() throws InvalidFormatException, IOException{
-		agregate_aux(new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()));
+		agregate_aux(new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "stats");
 	}
 
 	public Box get_infos() {
-		Log.d(f);
 		Sheet sheet1 = wb.getSheetAt(0);
 
 		List<TreeMap<String,Integer>> list = new ArrayList<TreeMap<String,Integer>> (3);
@@ -121,47 +124,75 @@ public class Excel_settings {
 
 		return new Box(list,nbcds,nbcds_no,trinucle);
 	}
+    
 
-	public static Box agregate_aux(Excel_settings es) throws InvalidFormatException, IOException {
+	public static Box agregate_aux(Excel_settings es, String type) throws InvalidFormatException, IOException {
+	    Box result = null;
+	    //Type represent the type of the stats we want to agregate (chromosome, mitochondrie...)
 		if(es.f.isFile()) {
-			if(es.f.exists()) {
-				FileInputStream inp = new FileInputStream(es.f);
-				es.wb = WorkbookFactory.create(inp);
-				Box bb = es.get_infos();
-				inp.close();
-				return bb;
-			}
-			else
-				return new Box();
+		    if(es.f.getName().contains(type + extension)) { // If it's a good stat file, we get the informations
+			    es.wb = WorkbookFactory.create(es.f);
+			    result = es.get_infos();
+		    }
 		}
+		else {
+		    Box b = new Box();
+            File[] children = es.f.listFiles();
+            boolean leaf = true;
+            
+            //Test if it's a leaf (id: a replicon)
+		    for (File file : children) {
+		        if(!file.isFile())
+		            leaf = false;
+		    }
+		
+		    //Get the stat file in the current dir (There is only one here)
+		    //And return it
+		    if(leaf) {
+		        File file = children[0];
+		        ArrayList<String> path = es.table;
+			    path.add(file.getName());
+			    result = agregate_aux(new Excel_settings(file, path), type);
+		    }
+		    else {
+		        //Else we create a new one agregated and propagate
+		        for (File file : children) {
+		           if(!file.isFile()) {
+		                ArrayList<String> path = new ArrayList<String>();
+		                for(String path_elt : es.table) //Deep copy
+		                    path.add(path_elt);
+			            path.add(file.getName());
+			            b = b.add(agregate_aux(new Excel_settings(file, path), type));
+			        }
+		        }
+		
+		        //Do not the root
+		        if(es.f.getName().equals(ExcelLent.tree_root.getName()))
+			        return null;
 
-		Box b = new Box();
+                //After that we delete the file if it's exist
+                //Indeed, it can be empty thus we can't update it
+		        es.f = util.PathUtils.child(es.f, type + extension);
+		
+		        if(es.f.exists())
+			        es.f.delete();
+                
+                //Then create a new one
+                es.f.createNewFile();
 
-		for (File file : es.f.listFiles()) {
-			ArrayList<String> path = es.table;
-			path.add(file.getName());
-			b.add(agregate_aux(new Excel_settings(file, path)));
-		}
+                //And fill it
+		        FileOutputStream fileout = new FileOutputStream(es.f);
+		        es.new_excel(b.l,b.nCds, b.nCdsNot, b.nbNucleotides);
 
-		//Don't do the root
-		if(es.f.getName().equals(ExcelLent.tree_root.getName()))
-			return null;
-
-
-		es.f = util.PathUtils.child(es.f, "stats" + extension);
-		if(es.f.exists())
-			es.f.delete();
-
-		es.f.createNewFile();
-
-		FileOutputStream fileout = new FileOutputStream(es.f);
-		es.new_excel(b.l,b.nCds, b.nCdsNot, b.nbNucleotides);
-
-		es.wb.write(fileout);
-		fileout.close();
-
-		return b;
+		        es.wb.write(fileout);
+		        fileout.close();
+		        
+		        result = b;
+		    }
+        }
+		return result;
 	}
+	
 	// Create
 	/**
 	 * Create a new xls with the number of each nucleotide.
@@ -359,13 +390,13 @@ public class Excel_settings {
 			int current = 0 + min;
 			for (Map.Entry<String, Integer> entry : tree.entrySet())
 			{ // for each trinucleotides
+				//Log.d(entry.getValue());
 				Row row = sheet1.getRow(current++);
 				Cell cell = row.createCell(j);
 				cell.setCellStyle(cellStyle);
 				cell.setCellValue(entry.getValue());
 			}
 
-			Log.d(j);
 			Row row = sheet1.getRow(max+1);
 			Cell cell = row.createCell(j);
 			String letter = phases[phase++];
@@ -541,6 +572,7 @@ public class Excel_settings {
 
 	public static void main (String[] args) throws InvalidFormatException, IOException, InterruptedException
 	{
+		/*
 		ArrayList<String> chemin = new ArrayList<String>();
 		chemin.add("Viruses");
 		chemin.add("dsRNA viruses");
@@ -554,5 +586,7 @@ public class Excel_settings {
 		test.put("IZI", 92);
 
 		update_helper(es, test, null, null,0,0);
+		*/
+		agregate_excels();
 	}
 }

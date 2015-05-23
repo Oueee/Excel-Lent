@@ -13,44 +13,44 @@ public class Box {
 
 	public int nCds;
 	public int nCdsNot;
-  public int nbNucleotides;
-
+    public int nbNucleotides;
+    
   public Box(List<TreeMap<String, Integer>> l,
              int noCdsTraitees,
            	 int noCdsNonTraitees,
              int nbNucleotides)
   {
     this.l = l;
-    this.nCds = nCds;
-    this.nCdsNot = nCdsNot;
+    this.nCds = noCdsTraitees;
+    this.nCdsNot = noCdsNonTraitees;
     this.nbNucleotides = nbNucleotides;
   }
 
   public Box() {
-    l = new ArrayList<TreeMap<String, Integer>>();
-
-    for(int i = 0; i < 3; i++)
-      l.add(new TreeMap<String, Integer>());
-
-
-  	nCds = 0;
-  	nCdsNot = 0;
-    nbNucleotides = 0;
-
+    this.nbNucleotides = 0; //Means that the box is empty
   };
-  public void add(Box b) {
-    this.nCds += b.nCds;
-    this.nCdsNot += b.nCdsNot;
-    this.nbNucleotides += b.nbNucleotides;
-    TreeMap<String, Integer> t;
-    TreeMap<String, Integer> a;
+  
+  public Box add(Box b) {
 
-    for(int i = 0; i < l.size(); i++) {
-      t = b.l.get(i);
-      a = this.l.get(i);
+    if(this.nbNucleotides == 0) //If this box is empty, return the box to add
+        return b;
+    
+    if(b != null) { //If the other box is not null, add it to this one
+        this.nCds += b.nCds;
+        this.nCdsNot += b.nCdsNot;
+        this.nbNucleotides += b.nbNucleotides;
+        TreeMap<String, Integer> t;
+        TreeMap<String, Integer> a;
 
-      for(String key : a.keySet())
-        a.put(key, a.get(key) + t.get(key));
+        for(int i = 0; i < l.size(); i++) {
+          t = b.l.get(i);
+          a = this.l.get(i);
+
+          for(String key : a.keySet())
+            a.put(key, a.get(key) + t.get(key));
+        }
     }
+    
+    return this; //then return this object
   }
 }
