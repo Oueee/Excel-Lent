@@ -17,7 +17,6 @@ import connection.Connector;
 import statistics.AnalysisResults;
 import util.PathUtils;
 import util.Log;
-import util.Pair;
 import excel.Excel_settings;
 
 /**
@@ -78,13 +77,10 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 		Excel_settings es = null;
 
 		path.add(0, kingdomDir.getName());
-		for (Pair<String,String> replicon: (Set<Pair<String,String>>) specieInfos.get("replicons")) {
-		  String repliconID = replicon.x;
-		  String repliconType = replicon.y;
-		  
+		for (String repliconID : (Set<String>) specieInfos.get("replicons")) {
 			path.add(repliconID);
 
-			path_replicon = PathUtils.child(path_specie, repliconID, repliconType + Excel_settings.extension);
+			path_replicon = PathUtils.child(path_specie, repliconID, "stats" + Excel_settings.extension);
 			//If we did it, we pass at the next one
 			if(path_replicon.exists())
 				continue;

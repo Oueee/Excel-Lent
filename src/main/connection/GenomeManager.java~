@@ -31,7 +31,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import org.json.JSONObject;
 import org.json.JSONArray;
 import util.Log;
-import util.Pair;
 import util.PathUtils;
 import gui.ProgressBarListener;
 import core.SpeciesManager;
@@ -93,17 +92,17 @@ public class GenomeManager {
         HttpURLConnection httpConn = null;
         int responseCode = 0;
 
-        //try{
-            //httpConn = (HttpURLConnection) this.url.openConnection();
-            responseCode = HttpURLConnection.HTTP_OK;//httpConn.getResponseCode();
-        /*} catch(IOException e) {
+        try{
+            httpConn = (HttpURLConnection) this.url.openConnection();
+            responseCode = httpConn.getResponseCode();
+        } catch(IOException e) {
             Log.e("No connection to internet, please check your connecion before retry");
             Log.exit();
         }
-*/
+
         if (responseCode == HttpURLConnection.HTTP_OK) {
             // opens input stream from the HTTP connection
-            InputStream inputStream = new FileInputStream(new File("/home/rinku/Downloads/genomes_euks.txt"));//httpConn.getInputStream();
+            InputStream inputStream = httpConn.getInputStream();
 
             String currentLine = "";
             String temp = "";
@@ -142,7 +141,7 @@ public class GenomeManager {
                                                                       specie,
                                                                       es, listener);
 
-                               //es.execute(sm);
+                               es.execute(sm);
                             }
                         }
 
@@ -180,7 +179,7 @@ public class GenomeManager {
         } else {
             Log.e("No file to download. Server replied HTTP code: " + responseCode);
         }
-        //httpConn.disconnect();
+        httpConn.disconnect();
 
         return newSpecies;
     }
@@ -189,7 +188,7 @@ public class GenomeManager {
     //Function to parse a specie of the species list's file
     private Map parseIndividual(String line, Map<String,Integer> regex) {
         Map result = new HashMap();
-        Set<Pair<String,String>> replicons = new HashSet<Pair<String,String>>();
+        Set<String> replicons = new HashSet<String>();
         Matcher m = null;
         String[] elements = line.split("\t");
         String elt;
@@ -207,25 +206,8 @@ public class GenomeManager {
             elt = replicons_brut[i].trim();
             m = pattern_replicon.matcher(elt);
 
-            if(m.find()) {
-                if(m.group(1) != null) {
-                  if(m.group(1).contains("chromosome"))
-                      replicons.add(new Pair("chromosome", m.group(2)));
-                  else if(m.group(1).contains("mitochondrion"))
-                      replicons.add(new Pair("mitochondrion", m.group(2)));
-                  else if(m.group(1).contains("chloroplast"))
-                      replicons.add(new Pair("chloroplast", m.group(2)));
-                  else if(m.group(1).contains("plasmid") ||
-                           m.group(1).contains("plastid"))
-                      replicons.add(new Pair("plasmid", m.group(2)));
-                  else if(m.group(1).contains("linkage"))
-                      replicons.add(new Pair("linkage", m.group(2)));
-                  else
-                      Log.e(m.group(1));// linkage apicoplast macronuclear
-                }
-                else
-                  Log.e(m.group());
-            }
+            if(m.find())
+                replicons.add(m.group(2));
         }
 
         for(Entry<String, Integer> entry : regex.entrySet())
@@ -295,6 +277,8 @@ public class GenomeManager {
 				if(((Set<String>)specie.get("replicons")).size() <= 0)
 					return false;
 
+
+
         File path_specie = PathUtils.child(this.root_path,
                                           (String)specie.get("group"),
                                           (String)specie.get("subGroup"),
@@ -304,8 +288,8 @@ public class GenomeManager {
 				File path_replicon;
 
         if(!oldSpecies.has(name)) {
-						for(Pair<String,String> replicon : (Set<Pair<String,String>>)specie.get("replicons")) {
-							path_replicon = util.PathUtils.child(path_specie, replicon.y);
+						for(String replicon : (Set<String>)specie.get("replicons")) {
+							path_replicon = util.PathUtils.child(path_specie, replicon);
 							path_replicon.mkdirs();
 						}
 						SpeciesManager.toDo(this.root_path, specie);
@@ -354,7 +338,7 @@ public class GenomeManager {
 					if(specie_saved.containsValue(bioProject))
 						return false;
 				}
-				else  
+				else
 					specie_saved = new LinkedHashMap<String,String>();
 
 				specie_saved.put(bioProject, modify_date);
