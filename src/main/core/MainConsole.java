@@ -4,6 +4,7 @@ import javax.swing.JProgressBar;
 
 import util.Log;
 import gui.ProgressBarListener;
+import javax.swing.JLabel;
 
 public class MainConsole{
   public static void main(String[] args) {
@@ -15,7 +16,8 @@ public class MainConsole{
 
     try{
       final JProgressBar progressBar = new JProgressBar(0, 100);
-      final ExcelLent excellent = new ExcelLent(new ProgressBarListener(progressBar));
+      final JLabel text = new JLabel ();
+      final ExcelLent excellent = new ExcelLent(new ProgressBarListener(progressBar, text));
 
       Log.i("#########################");
       Log.i("/!\\ Stop with a ^C... /!\\");

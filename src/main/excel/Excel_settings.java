@@ -49,7 +49,7 @@ public class Excel_settings {
 
 	public static String extension = ".xls";
   
-  
+  //Why these here? I don't know, I don't know... pa pala pa pa
   private static final String types_replicons[] = {"chromosome", "mitochondrion", 
                                                      "chloroplast", "plasmid", "plastid", 
                                                      "linkage", "macronuclear", "DNA", "RNA"};
@@ -104,31 +104,20 @@ public class Excel_settings {
 		this.f_name = f.getName();
 		table = path;
 	}
-
+  
+  public static void agregate_excels(boolean fine) throws InvalidFormatException, IOException{
+    agregate_excels(fine, null);
+	}
+	
 		//Functions launched after all the epeces done.
 	//It agregate the leafs stats in node stats.
 	public static void agregate_excels(boolean fine, ProgressBarListener listener) throws InvalidFormatException, IOException{
-	  
-	  JSONObject species = new JSONObject();
-	  
-	  for (File kingdom : ExcelLent.tree_root.listFiles()) {
-	    if(!kingdom.isFile()) {
-	      File f = new File(kingdom, "done.json");
-	      FileInputStream fis = new FileInputStream(f);
-        byte[] data = new byte[(int) f.length()];
-        String json;
-        
-        fis.read(data);
-        fis.close();
-        JSONObject species_kingdom = new JSONObject(new String(data, "UTF-8"));
-        species.put(kingdom.getName(), (Object)species_kingdom);
-	    }
-	  }
-    
     
     for(String type_replicon : types_replicons) {
-      listener.setText("Create statistics for " + type_replicon);
-      agregate_aux(species, fine, new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), type_replicon);
+      //console case
+      if(listener != null)
+        listener.setText("Create statistics for " + type_replicon);
+      agregate_aux(fine, new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), type_replicon);
     }
 	}
                       
@@ -156,25 +145,18 @@ public class Excel_settings {
 	}
     
 
-	public static Box agregate_aux(JSONObject species, boolean fine, Excel_settings es, String type) throws InvalidFormatException, IOException {
+	public static Box agregate_aux(boolean fine, Excel_settings es, String type) throws InvalidFormatException, IOException {
 	    Box result = null;
 	    //Type represent the type of the stats we want to agregate (chromosome, mitochondrie...)
 		if(es.f.isFile()) {
 		    if(es.f.getName().equals(type + extension)) { // If it's a good stat file, we get the informations
-		      boolean toDo = false;
-		      
-		      if(!fine)
-		        toDo = true;
-		        
-		      if(toDo) {
-            try{
-			        es.wb = WorkbookFactory.create(es.f);
-			        result = es.get_infos();
-			      }catch(Exception e){
-			        Log.e("excel file " + es.f + " is malformed!");
-			      }
+          try{
+			      es.wb = WorkbookFactory.create(es.f);
+			      result = es.get_infos();
+			    }catch(Exception e){
+			      Log.e("excel file " + es.f + " is malformed!");
 			    }
-		    }
+			  }
 		}
 		else {
 		    Box b = new Box();
@@ -183,7 +165,6 @@ public class Excel_settings {
             
             //Test if it's a leaf (id: a replicon)
 		    for (File file : children) {
-		        
 		        try{//Bug once, don't know why
 		          if(!file.isFile())
 		              leaf = false;
@@ -197,23 +178,30 @@ public class Excel_settings {
 		    if(leaf) {
 		      if(Array.getLength(children) > 0) {
 		        for(File file : children) { // Actually, it can be a block file if we stop the program during the writing
-		        ArrayList<String> path = es.table;
-			    path.add(file.getName());
-			    result = agregate_aux(species, fine, new Excel_settings(file, path), type);
-			    }
+		          ArrayList<String> path = es.table;
+			        path.add(file.getName());
+			        result = agregate_aux(fine, new Excel_settings(file, path), type);
+			      }
 			    }
 		    }
 		    else {
 		        //Else we create a new one agregated and propagate
+		        //For the fine stats, we just get the first bio project (path size 5)
+		        boolean first = true;
 		        for (File file : children) {
-		           if(!file.isFile()) {
-		                ArrayList<String> path = new ArrayList<String>();
-		                for(String path_elt : es.table) //Deep copy
-		                    path.add(path_elt);
+		          if(!file.isFile()) {
+		             // If it's the specie folder and it's a fine stat and it's not the first one, we pass
+		            if(!fine || first || es.table.size() != 4)
+		            {
+		              ArrayList<String> path = new ArrayList<String>();
+		              for(String path_elt : es.table) //Deep copy
+		                  path.add(path_elt);
 			            path.add(file.getName());
 
-			            Box b_son = agregate_aux(species, fine, new Excel_settings(file, path), type);
+			            Box b_son = agregate_aux(fine, new Excel_settings(file, path), type);
 			            b = b.add(b_son);
+			            first = false;
+			           }
 			        }
 		        }
 		
@@ -645,6 +633,6 @@ public class Excel_settings {
 
 		update_helper(es, test, null, null,0,0);
 		*/
-		;
+		agregate_excels(true);
 	}
 }
