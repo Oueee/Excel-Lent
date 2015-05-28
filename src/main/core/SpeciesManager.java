@@ -120,7 +120,7 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 							(String) specieInfos.get("name"));
 
 		int progress = (int) (100 * completed);
-		listener.setProgress(progress);
+		listener.setProgress(es.getCompletedTaskCount(), es.getTaskCount());
 		toDo(kingdomDir, specieInfos, true);
 	}
 

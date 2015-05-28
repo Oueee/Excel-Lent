@@ -86,7 +86,7 @@ public class ExcelLent implements Runnable {
           es.shutdown();
           es.awaitTermination(60, TimeUnit.SECONDS);
 
-          Excel_settings.agregate_excels(this.fine);
+          Excel_settings.agregate_excels(this.fine, listener);
         }catch(Exception e) {
           e.printStackTrace();
             //Log.e(e);

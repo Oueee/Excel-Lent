@@ -68,7 +68,10 @@ public class GUI  extends JFrame{
 	        label.setFont(new Font("Roboto", Font.BOLD, 15));
 	        Global.lbl = label;
 	        final JProgressBar progressBar = new JProgressBar(0, 100);
-	        final ExcelLent excellent = new ExcelLent(new ProgressBarListener(progressBar));
+	        final JLabel progressText = new JLabel("Species done: 0/0");
+	        
+	        ProgressBarListener pbl = new ProgressBarListener(progressBar, progressText);
+	        final ExcelLent excellent = new ExcelLent(pbl);
 					FileTree tree = new FileTree(ExcelLent.tree_root);
 					JButton button = new JButton();
 					JButton b;
@@ -109,19 +112,19 @@ public class GUI  extends JFrame{
 						choice.add(v_cb);
 
 						e_cb = new JCheckBox("Eukaryotes");
-						e_cb.setSelected(false);
+						e_cb.setSelected(true);
 						choice.add(e_cb);
 
 						p_cb = new JCheckBox("Prokaryotes");
-						p_cb.setSelected(false);
+						p_cb.setSelected(true);
 						choice.add(p_cb);
 
 						ButtonGroup group = new ButtonGroup();
 							fine = new JRadioButton("fine");
-							fine.setSelected(true);
 							group.add(fine);
 
 							massive = new JRadioButton("massive");
+							fine.setSelected(true);
 							group.add(massive);
 
 						choice.add(Box.createHorizontalStrut(25));
@@ -141,6 +144,7 @@ public class GUI  extends JFrame{
 							}
 					});
 					choice.add(b);
+					choice.add(Box.createHorizontalStrut(10));
 					b = new JButton(new AbstractAction("Refresh tree") {
 						public void actionPerformed(ActionEvent e) {
 							tree.refresh();
@@ -150,6 +154,7 @@ public class GUI  extends JFrame{
 
 					main.add(tree);
 					main.add(choice);
+					main.add(progressText);
 					main.add(progressBar);
 
 	        explore.setAutoscrolls(true);

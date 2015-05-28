@@ -36,6 +36,7 @@ import util.Log;
 import util.PathUtils;
 import core.ExcelLent;
 import statistics.AnalysisResults;
+import gui.ProgressBarListener;
 
 /**
  * Class to manage the Excel (create/update).
@@ -47,7 +48,11 @@ public class Excel_settings {
 	// Attributes
 
 	public static String extension = ".xls";
-
+  
+  
+  private static final String types_replicons[] = {"chromosome", "mitochondrion", 
+                                                     "chloroplast", "plasmid", "plastid", 
+                                                     "linkage", "macronuclear", "DNA", "RNA"};
 	/**
 	 * The current Workbook.
 	 * @see Excel_settings#Excel_settings(File, ArrayList)
@@ -102,7 +107,7 @@ public class Excel_settings {
 
 		//Functions launched after all the epeces done.
 	//It agregate the leafs stats in node stats.
-	public static void agregate_excels(boolean fine) throws InvalidFormatException, IOException{
+	public static void agregate_excels(boolean fine, ProgressBarListener listener) throws InvalidFormatException, IOException{
 	  
 	  JSONObject species = new JSONObject();
 	  
@@ -119,17 +124,12 @@ public class Excel_settings {
         species.put(kingdom.getName(), (Object)species_kingdom);
 	    }
 	  }
-
-		agregate_aux(species, fine, new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "chromosome");
-		agregate_aux(species, fine, new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "mitochondrion");
-		agregate_aux(species, fine, new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "chloroplast");
-		agregate_aux(species, fine, new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "plasmid");
-		agregate_aux(species, fine, new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "plastid");
-		agregate_aux(species, fine, new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "linkage");
-		agregate_aux(species, fine, new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "apicoplast");
-		agregate_aux(species, fine, new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "macronuclear");
-		agregate_aux(species, fine, new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "DNA");
-		agregate_aux(species, fine, new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "RNA");
+    
+    
+    for(String type_replicon : types_replicons) {
+      listener.setText("Create statistics for " + type_replicon);
+      agregate_aux(species, fine, new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), type_replicon);
+    }
 	}
                       
 	public Box get_infos() {
@@ -645,6 +645,6 @@ public class Excel_settings {
 
 		update_helper(es, test, null, null,0,0);
 		*/
-		agregate_excels(false);
+		;
 	}
 }
