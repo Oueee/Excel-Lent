@@ -93,17 +93,17 @@ public class GenomeManager {
         HttpURLConnection httpConn = null;
         int responseCode = 0;
 
-        //try{
-            //httpConn = (HttpURLConnection) this.url.openConnection();
-            responseCode = HttpURLConnection.HTTP_OK;//httpConn.getResponseCode();
-        /*} catch(IOException e) {
+        try{
+            httpConn = (HttpURLConnection) this.url.openConnection();
+            responseCode = httpConn.getResponseCode();
+        } catch(IOException e) {
             Log.e("No connection to internet, please check your connecion before retry");
             Log.exit();
         }
-*/
+
         if (responseCode == HttpURLConnection.HTTP_OK) {
             // opens input stream from the HTTP connection
-            InputStream inputStream = new FileInputStream(new File("/home/rinku/Downloads/genomes_euks.txt"));//httpConn.getInputStream();
+            InputStream inputStream = httpConn.getInputStream();
 
             String currentLine = "";
             String temp = "";
@@ -180,7 +180,7 @@ public class GenomeManager {
         } else {
             Log.e("No file to download. Server replied HTTP code: " + responseCode);
         }
-        //httpConn.disconnect();
+        httpConn.disconnect();
 
         return newSpecies;
     }
@@ -201,30 +201,39 @@ public class GenomeManager {
 
 
         String[] replicons_brut = elements[regex.get("replicons")].split(";");
-        Pattern pattern_replicon = Pattern.compile("^([\\w\\-\\s]*:)?([\\w_\\.]*)(/[\\w_\\.]*)*$");
+        Pattern pattern_replicon = Pattern.compile("^([\\w\\-\\s]*:)([\\w_\\.]*)(/[\\w_\\.]*)*$");
+        Pattern pattern_replicon_without_type = Pattern.compile("^([\\w_\\.]*)(/[\\w_\\.]*)*$");
 
         for(int i = 0; i < replicons_brut.length; i++) {
             elt = replicons_brut[i].trim();
             m = pattern_replicon.matcher(elt);
 
             if(m.find()) {
-                if(m.group(1) != null) {
-                  if(m.group(1).contains("chromosome"))
-                      replicons.add(new Pair("chromosome", m.group(2)));
-                  else if(m.group(1).contains("mitochondrion"))
+                  if(m.group(1).contains("mitochondrion"))
                       replicons.add(new Pair("mitochondrion", m.group(2)));
                   else if(m.group(1).contains("chloroplast"))
                       replicons.add(new Pair("chloroplast", m.group(2)));
-                  else if(m.group(1).contains("plasmid") ||
-                           m.group(1).contains("plastid"))
+                  else if(m.group(1).contains("plasmid"))
                       replicons.add(new Pair("plasmid", m.group(2)));
                   else if(m.group(1).contains("linkage"))
                       replicons.add(new Pair("linkage", m.group(2)));
+                  else if(m.group(1).contains("plastid"))
+                      replicons.add(new Pair("plastid", m.group(2)));
+                  else if(m.group(1).contains("apicoplast"))
+                      replicons.add(new Pair("apicoplast", m.group(2)));
+                  else if(m.group(1).contains("macronuclear"))
+                      replicons.add(new Pair("macronuclear", m.group(2)));
+                  else if(m.group(1).contains("DNA"))
+                      replicons.add(new Pair("DNA", m.group(2)));
+                  else if(m.group(1).contains("RNA"))
+                      replicons.add(new Pair("RNA", m.group(2)));
                   else
-                      Log.e(m.group(1));// linkage apicoplast macronuclear
-                }
-                else
-                  Log.e(m.group());
+                      replicons.add(new Pair("chromosome", m.group(2)));
+            }
+            else { //get replicons without title
+              m = pattern_replicon_without_type.matcher(elt);
+              if(m.find())  
+                replicons.add(new Pair("chromosome", m.group(1)));
             }
         }
 

@@ -99,7 +99,7 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 							   				 (TreeMap)result.getPhase1Frequencies(),
 												 result.getNoCdsTraitees(),
 												 result.getNoCdsNonTraitees());
-      Log.d(path);
+
 			path.remove(path.size()-1);
 		}
 	}	catch(Exception e){

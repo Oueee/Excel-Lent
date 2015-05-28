@@ -11,6 +11,7 @@ import java.nio.channels.FileLock;
 import java.nio.channels.FileChannel;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.TreeMap;
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -29,6 +30,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
+import org.json.JSONObject;
+import org.json.JSONArray;
 import util.Log;
 import util.PathUtils;
 import core.ExcelLent;
@@ -99,13 +102,36 @@ public class Excel_settings {
 
 		//Functions launched after all the epeces done.
 	//It agregate the leafs stats in node stats.
-	public static void agregate_excels() throws InvalidFormatException, IOException{
-		agregate_aux(new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "chromosome");
-		agregate_aux(new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "mitochondrion");
-		agregate_aux(new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "chloroplast");
-		agregate_aux(new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "plasmid");
-	}
+	public static void agregate_excels(boolean fine) throws InvalidFormatException, IOException{
+	  
+	  JSONObject species = new JSONObject();
+	  
+	  for (File kingdom : ExcelLent.tree_root.listFiles()) {
+	    if(!kingdom.isFile()) {
+	      File f = new File(kingdom, "done.json");
+	      FileInputStream fis = new FileInputStream(f);
+        byte[] data = new byte[(int) f.length()];
+        String json;
+        
+        fis.read(data);
+        fis.close();
+        JSONObject species_kingdom = new JSONObject(new String(data, "UTF-8"));
+        species.put(kingdom.getName(), (Object)species_kingdom);
+	    }
+	  }
 
+		agregate_aux(species, fine, new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "chromosome");
+		agregate_aux(species, fine, new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "mitochondrion");
+		agregate_aux(species, fine, new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "chloroplast");
+		agregate_aux(species, fine, new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "plasmid");
+		agregate_aux(species, fine, new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "plastid");
+		agregate_aux(species, fine, new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "linkage");
+		agregate_aux(species, fine, new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "apicoplast");
+		agregate_aux(species, fine, new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "macronuclear");
+		agregate_aux(species, fine, new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "DNA");
+		agregate_aux(species, fine, new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "RNA");
+	}
+                      
 	public Box get_infos() {
 		Sheet sheet1 = wb.getSheetAt(0);
 
@@ -130,13 +156,24 @@ public class Excel_settings {
 	}
     
 
-	public static Box agregate_aux(Excel_settings es, String type) throws InvalidFormatException, IOException {
+	public static Box agregate_aux(JSONObject species, boolean fine, Excel_settings es, String type) throws InvalidFormatException, IOException {
 	    Box result = null;
 	    //Type represent the type of the stats we want to agregate (chromosome, mitochondrie...)
 		if(es.f.isFile()) {
 		    if(es.f.getName().equals(type + extension)) { // If it's a good stat file, we get the informations
-			    es.wb = WorkbookFactory.create(es.f);
-			    result = es.get_infos();
+		      boolean toDo = false;
+		      
+		      if(!fine)
+		        toDo = true;
+		        
+		      if(toDo) {
+            try{
+			        es.wb = WorkbookFactory.create(es.f);
+			        result = es.get_infos();
+			      }catch(Exception e){
+			        Log.e("excel file " + es.f + " is malformed!");
+			      }
+			    }
 		    }
 		}
 		else {
@@ -146,8 +183,12 @@ public class Excel_settings {
             
             //Test if it's a leaf (id: a replicon)
 		    for (File file : children) {
-		        if(!file.isFile())
-		            leaf = false;
+		        
+		        try{//Bug once, don't know why
+		          if(!file.isFile())
+		              leaf = false;
+		        }catch(Exception e) {Log.d(file);}
+		        
 		    }
 		    
 		    //Get the stat file in the current dir (There is only one here)
@@ -158,7 +199,7 @@ public class Excel_settings {
 		        for(File file : children) { // Actually, it can be a block file if we stop the program during the writing
 		        ArrayList<String> path = es.table;
 			    path.add(file.getName());
-			    result = agregate_aux(new Excel_settings(file, path), type);
+			    result = agregate_aux(species, fine, new Excel_settings(file, path), type);
 			    }
 			    }
 		    }
@@ -171,7 +212,7 @@ public class Excel_settings {
 		                    path.add(path_elt);
 			            path.add(file.getName());
 
-			            Box b_son = agregate_aux(new Excel_settings(file, path), type);
+			            Box b_son = agregate_aux(species, fine, new Excel_settings(file, path), type);
 			            b = b.add(b_son);
 			        }
 		        }
@@ -604,6 +645,6 @@ public class Excel_settings {
 
 		update_helper(es, test, null, null,0,0);
 		*/
-		agregate_excels();
+		agregate_excels(false);
 	}
 }
