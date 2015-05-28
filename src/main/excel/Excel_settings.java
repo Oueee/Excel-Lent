@@ -12,8 +12,10 @@ import java.nio.channels.FileChannel;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
+import java.lang.reflect.Array;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -98,15 +100,17 @@ public class Excel_settings {
 		//Functions launched after all the epeces done.
 	//It agregate the leafs stats in node stats.
 	public static void agregate_excels() throws InvalidFormatException, IOException{
-		agregate_aux(new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "stats");
+		agregate_aux(new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "chromosome");
+		agregate_aux(new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "mitochondrion");
+		agregate_aux(new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "chloroplast");
+		agregate_aux(new Excel_settings(ExcelLent.tree_root, new ArrayList<String>()), "plasmid");
 	}
 
 	public Box get_infos() {
 		Sheet sheet1 = wb.getSheetAt(0);
 
 		List<TreeMap<String,Integer>> list = new ArrayList<TreeMap<String,Integer>> (3);
-
-
+  
 		int nbcds = (int)sheet1.getRow(2).getCell(1).getNumericCellValue();
 		int nbcds_no = (int)sheet1.getRow(4).getCell(1).getNumericCellValue();
 		int trinucle = (int)sheet1.getRow(3).getCell(1).getNumericCellValue();
@@ -145,14 +149,18 @@ public class Excel_settings {
 		        if(!file.isFile())
 		            leaf = false;
 		    }
-		
+		    
 		    //Get the stat file in the current dir (There is only one here)
 		    //And return it
+		    //TODO : check if it's empty
 		    if(leaf) {
+		      if(Array.getLength(children) > 0) {
+		        
 		        File file = children[0];
 		        ArrayList<String> path = es.table;
 			    path.add(file.getName());
 			    result = agregate_aux(new Excel_settings(file, path), type);
+			    }
 		    }
 		    else {
 		        //Else we create a new one agregated and propagate
@@ -162,7 +170,9 @@ public class Excel_settings {
 		                for(String path_elt : es.table) //Deep copy
 		                    path.add(path_elt);
 			            path.add(file.getName());
-			            b = b.add(agregate_aux(new Excel_settings(file, path), type));
+
+			            Box b_son = agregate_aux(new Excel_settings(file, path), type);
+			            b = b.add(b_son);
 			        }
 		        }
 		
@@ -173,7 +183,7 @@ public class Excel_settings {
                 //After that we delete the file if it's exist
                 //Indeed, it can be empty thus we can't update it
 		        es.f = util.PathUtils.child(es.f, type + extension);
-		
+
 		        if(es.f.exists())
 			        es.f.delete();
                 
@@ -182,7 +192,9 @@ public class Excel_settings {
 
                 //And fill it
 		        FileOutputStream fileout = new FileOutputStream(es.f);
-		        es.new_excel(b.l,b.nCds, b.nCdsNot, b.nbNucleotides);
+		        
+		        if(!b.isEmpty())
+		          es.new_excel(b.l,b.nCds, b.nCdsNot, b.nbNucleotides);
 
 		        es.wb.write(fileout);
 		        fileout.close();
@@ -354,6 +366,11 @@ public class Excel_settings {
 		Cell cell = row.getCell(1);
 		cell.setCellStyle(cellStyle);
 		cell.setCellValue(nb_tr);
+		
+				// not really effecient...
+		for(int i = 0 ; i < 7 ; i++)
+			sheet1.autoSizeColumn(i,true);
+			
 	}
 
 	/**

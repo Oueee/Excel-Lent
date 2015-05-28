@@ -136,6 +136,8 @@ public class GUI  extends JFrame{
 																p_cb.isSelected(),
 																fine.isSelected());
 							new Thread(excellent).start();
+							JButton button = (JButton)e.getSource();
+							button.setEnabled(false);
 							}
 					});
 					choice.add(b);

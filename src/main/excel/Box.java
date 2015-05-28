@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.ArrayList;
 import java.util.List;
-
+import util.Log;
 
 public class Box {
 
@@ -30,25 +30,35 @@ public class Box {
     this.nbNucleotides = 0; //Means that the box is empty
   };
   
-  public Box add(Box b) {
-
-    if(this.nbNucleotides == 0) //If this box is empty, return the box to add
-        return b;
+  public boolean isEmpty() {
+    return this.nbNucleotides == 0;
+  }
+  
+  public Box add(Box b) {    
     
-    if(b != null) { //If the other box is not null, add it to this one
-        this.nCds += b.nCds;
-        this.nCdsNot += b.nCdsNot;
-        this.nbNucleotides += b.nbNucleotides;
-        TreeMap<String, Integer> t;
-        TreeMap<String, Integer> a;
+    if(b != null) { //If the other box is not null
+        //If this box is empty, return the box to add
+        //It's a trick to don't have to initialize it ;)
 
-        for(int i = 0; i < l.size(); i++) {
-          t = b.l.get(i);
-          a = this.l.get(i);
+        if(this.isEmpty())
+          return b;
+          
+        else if(!b.isEmpty()) {
+          //else add the two box and return it
+          this.nCds += b.nCds;
+          this.nCdsNot += b.nCdsNot;
+          this.nbNucleotides += b.nbNucleotides;
+          TreeMap<String, Integer> t;
+          TreeMap<String, Integer> a;
+          
+          for(int i = 0; i < this.l.size(); i++) {
+            t = b.l.get(i);
+            a = this.l.get(i);
 
-          for(String key : a.keySet())
-            a.put(key, a.get(key) + t.get(key));
-        }
+            for(String key : a.keySet())
+              a.put(key, a.get(key) + t.get(key));
+          }
+      }
     }
     
     return this; //then return this object
