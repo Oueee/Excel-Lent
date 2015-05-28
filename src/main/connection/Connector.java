@@ -35,8 +35,16 @@ public class Connector {
 	public AnalysisResults downloadAndAnalyseReplicon(String repliconID) throws IOException {
 		String urlString = URL_PREFIX + repliconID + URL_SUFFIX;
 		URL url = new URL(urlString);
-		HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
-		int responseCode = httpConn.getResponseCode();
+		HttpURLConnection httpConn = null;
+		int responseCode = 0;
+    
+    try{
+            httpConn = (HttpURLConnection) url.openConnection();
+            responseCode = httpConn.getResponseCode();
+        } catch(IOException e) {
+            Log.e("No connection to internet.");
+            return results;
+        }
 
 		// always check HTTP response code first
 		if (responseCode == HttpURLConnection.HTTP_OK) {
