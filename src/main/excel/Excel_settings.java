@@ -134,7 +134,7 @@ public class Excel_settings {
 	    Box result = null;
 	    //Type represent the type of the stats we want to agregate (chromosome, mitochondrie...)
 		if(es.f.isFile()) {
-		    if(es.f.getName().contains(type + extension)) { // If it's a good stat file, we get the informations
+		    if(es.f.getName().equals(type + extension)) { // If it's a good stat file, we get the informations
 			    es.wb = WorkbookFactory.create(es.f);
 			    result = es.get_infos();
 		    }
@@ -155,11 +155,11 @@ public class Excel_settings {
 		    //TODO : check if it's empty
 		    if(leaf) {
 		      if(Array.getLength(children) > 0) {
-		        
-		        File file = children[0];
+		        for(File file : children) { // Actually, it can be a block file if we stop the program during the writing
 		        ArrayList<String> path = es.table;
 			    path.add(file.getName());
 			    result = agregate_aux(new Excel_settings(file, path), type);
+			    }
 			    }
 		    }
 		    else {
@@ -302,26 +302,7 @@ public class Excel_settings {
 		cell.setCellStyle(style);
 		cell.setCellValue("Total");
 		// -----------------------------------------------------------------------
-
-		// not really effecient...
-		for(i = 0 ; i < 7 ; i++)
-			sheet1.autoSizeColumn(i,true);
-
-		row = sheet1.getRow(2);
-		cell = row.createCell(1);
-		cell.setCellStyle(cellStyle);
-		cell.setCellValue(nb_cds);
-
-		fill_excel(diff,sheet1,nb_cds,nb_cds_nt_treat);
-		row = sheet1.getRow(3);
-		cell = row.createCell(1);
-		cell.setCellStyle(cellStyle);
-		cell.setCellValue(nb_tr);
-
-		row = sheet1.getRow(4);
-		cell = row.createCell(1);
-		cell.setCellStyle(cellStyle);
-		cell.setCellValue(nb_cds_nt_treat);
+    fill_excel(diff,sheet1,nb_cds,nb_cds_nt_treat,nb_tr);
 	}
 
 	private FileChannel lock(FileOutputStream fileout) throws IOException, InterruptedException {
@@ -355,22 +336,13 @@ public class Excel_settings {
 	 * @throws InterruptedException
 	 * @see Excel_settings#update_helper_aux(Excel_settings, List)
 	 */
-	private void update_excel(final List<TreeMap<String,Integer>> diff,final int nb_cds, final int nb_cds_nt_treat) throws IOException, InterruptedException
+	private void update_excel(final List<TreeMap<String,Integer>> diff,final int nb_cds, final int nb_cds_nt_treat, final int nb_tr) throws IOException, InterruptedException
 	{
 		Sheet sheet1 = wb.getSheetAt(0);
 		CellStyle cellStyle = wb.createCellStyle();
 		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
 
-		double nb_tr = fill_excel(diff,sheet1,nb_cds,nb_cds_nt_treat);
-		Row row = sheet1.getRow(3);
-		Cell cell = row.getCell(1);
-		cell.setCellStyle(cellStyle);
-		cell.setCellValue(nb_tr);
-		
-				// not really effecient...
-		for(int i = 0 ; i < 7 ; i++)
-			sheet1.autoSizeColumn(i,true);
-			
+		fill_excel(diff,sheet1,nb_cds,nb_cds_nt_treat, nb_tr);
 	}
 
 	/**
@@ -386,12 +358,17 @@ public class Excel_settings {
 	 * @see Excel_settings#new_excel(List, int, int)
 	 * @see Excel_settings#update_excel(List, int, int)
 	 */
-	private double fill_excel(final List<TreeMap<String, Integer>> value, Sheet sheet1,
-			final int nb_cds, final int nb_cds_nt_treat )
+	private void fill_excel(final List<TreeMap<String, Integer>> value, Sheet sheet1,
+			final int nb_cds, final int nb_cds_nt_treat, final int nb_tr )
 	{
 		CellStyle cellStyle = wb.createCellStyle();
 		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
-
+    
+    CellStyle cellStyle_percentage = wb.createCellStyle();
+    DataFormat format = wb.createDataFormat();
+		cellStyle_percentage.setDataFormat(format.getFormat("0.00"));
+		cellStyle_percentage.setAlignment(CellStyle.ALIGN_CENTER);
+		
 		final int min = 7; // row min
 		final int max = 70; // row max
 
@@ -409,9 +386,16 @@ public class Excel_settings {
 			{ // for each trinucleotides
 				//Log.d(entry.getValue());
 				Row row = sheet1.getRow(current++);
+				
+				//Put count
 				Cell cell = row.createCell(j);
 				cell.setCellStyle(cellStyle);
 				cell.setCellValue(entry.getValue());
+				
+				//Put percentage
+				Cell cell_p = row.createCell(j+1);
+				cell_p.setCellStyle(cellStyle_percentage);
+				cell_p.setCellValue(entry.getValue() / (double)nb_tr);
 			}
 
 			Row row = sheet1.getRow(max+1);
@@ -423,9 +407,7 @@ public class Excel_settings {
 			j+=2;
 		}
 
-		DataFormat format = wb.createDataFormat();
-		cellStyle.setDataFormat(format.getFormat("0.00"));
-
+  /*
 		for (int i = 0,cur=2 ; i < 3 && cur<7 ; i++,cur+=2)
 		{
 			String letter = phases[i];
@@ -438,11 +420,29 @@ public class Excel_settings {
 				cell.setCellFormula(letter + (k+1) + "/" + letter + "72");
 			}
 		}
+    */
+    Row row;
+    Cell cell;
+    row = sheet1.getRow(2);
+		cell = row.createCell(1);
+		cell.setCellStyle(cellStyle);
+		cell.setCellValue(nb_cds);
 
-		Row row = sheet1.getRow(max+1);
-		Cell cell = row.getCell(1);
+		
+		row = sheet1.getRow(3);
+		cell = row.createCell(1);
+		cell.setCellStyle(cellStyle);
+		cell.setCellValue(nb_tr);
 
-		return cell.getNumericCellValue();
+		row = sheet1.getRow(4);
+		cell = row.createCell(1);
+		cell.setCellStyle(cellStyle);
+		cell.setCellValue(nb_cds_nt_treat);
+		
+				// not really effecient...
+		for(int i = 0 ; i < 7 ; i++)
+			sheet1.autoSizeColumn(i,true);
+			
 	}
 
 	/**
@@ -550,7 +550,7 @@ public class Excel_settings {
 
 			////// Do the action
 			if(exist)
-				es.update_excel(diff,nb_cds,nb_cds_untreated);
+				es.update_excel(diff,nb_cds,nb_cds_untreated,nb_tr);
 			else
 				es.new_excel(diff,nb_cds,nb_cds_untreated,nb_tr);
 
