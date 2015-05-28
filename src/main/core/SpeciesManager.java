@@ -79,12 +79,13 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 
 		path.add(0, kingdomDir.getName());
 		for (Pair<String,String> replicon: (Set<Pair<String,String>>) specieInfos.get("replicons")) {
-		  String repliconID = replicon.x;
-		  String repliconType = replicon.y;
+		  String repliconID = replicon.y;
+		  String repliconType = replicon.x;
 		  
 			path.add(repliconID);
 
 			path_replicon = PathUtils.child(path_specie, repliconID, repliconType + Excel_settings.extension);
+
 			//If we did it, we pass at the next one
 			if(path_replicon.exists())
 				continue;

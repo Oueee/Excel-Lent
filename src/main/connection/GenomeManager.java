@@ -142,7 +142,7 @@ public class GenomeManager {
                                                                       specie,
                                                                       es, listener);
 
-                               //es.execute(sm);
+                               es.execute(sm);
                             }
                         }
 

@@ -10,9 +10,9 @@ import shutil
 
 attributs = {
     'flags': '-g',# -Xlint:all',
-    'main_class': 'core.MainConsole'
+    #'main_class': 'core.MainConsole'
     #'main_class': 'gui.GUI',
-    #'main_class': 'excel.Excel_settings'
+    'main_class': 'excel.Excel_settings'
 }
 
 ### compile parts
@@ -20,7 +20,7 @@ def build(self):
     files_path = os.path.join('src', 'main')
     main_class = self.main_class.replace('.', os.sep) + '.java'
 
-    cmd = '{} -d bin -sourcepath {} -cp "lib/poi-3.11/*" {} {}'.format(
+    cmd = '{0} -d bin -sourcepath {1} -cp "lib/poi-3.11/*" {2} {3}'.format(
             self.compilo, files_path,
             os.path.join(files_path, main_class), self.flags)
 
@@ -29,7 +29,7 @@ def build(self):
 
 ### run parts
 def run(self, *args):
-    subprocess.call('java -cp "lib/poi-3.11/*:bin" {} {}'.format(self.main_class, ' '.join(args)),
+    subprocess.call('java -cp "lib/poi-3.11/*:bin" {0} {1}'.format(self.main_class, ' '.join(args)),
                         shell=True)
 
 
