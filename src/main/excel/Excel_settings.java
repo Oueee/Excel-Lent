@@ -165,7 +165,7 @@ public class Excel_settings {
             boolean leaf = true;
             
             //Test if it's a leaf (id: a replicon)
-            if(!children)
+            if(children == null)
               return result;
               
 		    for (File file : children) {
