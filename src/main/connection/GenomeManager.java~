@@ -91,13 +91,14 @@ public class GenomeManager {
 
         JSONObject newSpecies = new JSONObject();
         HttpURLConnection httpConn = null;
-        int responseCode = -1;
+        int responseCode = 0;
 
         try{
             httpConn = (HttpURLConnection) this.url.openConnection();
             responseCode = httpConn.getResponseCode();
         } catch(IOException e) {
-            Log.e("No connection to internet to ge the list of the genomes");
+            Log.e("No connection to internet, please check your connecion before retry");
+            Log.exit();
         }
 
         if (responseCode == HttpURLConnection.HTTP_OK) {
@@ -311,13 +312,18 @@ public class GenomeManager {
 
 				File path_replicon;
 
-        if(!oldSpecies.has(name) || !path_specie.exists()) {
+        if(!oldSpecies.has(name)) {
 						for(Pair<String,String> replicon : (Set<Pair<String,String>>)specie.get("replicons")) {
 							path_replicon = util.PathUtils.child(path_specie, replicon.y);
 							path_replicon.mkdirs();
 						}
 						SpeciesManager.toDo(this.root_path, specie);
 						toDo = true;
+        }
+        else if(!path_specie.exists()) {
+            Log.e("The specie path " + path_specie.getAbsolutePath() +
+                  " doesn't exist anymore. However, we have already parse it");
+						Log.exit();
         }
         else {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
