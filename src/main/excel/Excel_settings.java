@@ -126,9 +126,9 @@ public class Excel_settings {
 
 		List<TreeMap<String,Integer>> list = new ArrayList<TreeMap<String,Integer>> (3);
   
-		int nbcds = (int)sheet1.getRow(2).getCell(1).getNumericCellValue();
-		int nbcds_no = (int)sheet1.getRow(4).getCell(1).getNumericCellValue();
-		int trinucle = (int)sheet1.getRow(3).getCell(1).getNumericCellValue();
+		long nbcds = (long)sheet1.getRow(2).getCell(1).getNumericCellValue();
+		long nbcds_no = (long)sheet1.getRow(4).getCell(1).getNumericCellValue();
+		long trinucle = (long)sheet1.getRow(3).getCell(1).getNumericCellValue();
 
 		for (int k=1 ; k < 6 ; k+=2)
 		{
@@ -249,7 +249,7 @@ public class Excel_settings {
 	 * @throws IOException
 	 * @see Excel_settings#update_helper_aux(Excel_settings, List)
 	 */
-	private void new_excel (final List<TreeMap<String,Integer>> diff,final int nb_cds, final int nb_cds_nt_treat, final int nb_tr) throws IOException{
+	private void new_excel (final List<TreeMap<String,Integer>> diff,final long nb_cds, final long nb_cds_nt_treat, final long nb_tr) throws IOException{
 		String name_element = table.get(table.size()-1);
 		String safename = WorkbookUtil.createSafeSheetName(name_element);
 		Sheet sheet1 = wb.createSheet(safename);
@@ -368,7 +368,7 @@ public class Excel_settings {
 	 * @throws InterruptedException
 	 * @see Excel_settings#update_helper_aux(Excel_settings, List)
 	 */
-	private void update_excel(final List<TreeMap<String,Integer>> diff,final int nb_cds, final int nb_cds_nt_treat, final int nb_tr) throws IOException, InterruptedException
+	private void update_excel(final List<TreeMap<String,Integer>> diff,final long nb_cds, final long nb_cds_nt_treat, final long nb_tr) throws IOException, InterruptedException
 	{
 		Sheet sheet1 = wb.getSheetAt(0);
 		CellStyle cellStyle = wb.createCellStyle();
@@ -391,7 +391,7 @@ public class Excel_settings {
 	 * @see Excel_settings#update_excel(List, int, int)
 	 */
 	private void fill_excel(final List<TreeMap<String, Integer>> value, Sheet sheet1,
-			final int nb_cds, final int nb_cds_nt_treat, final int nb_tr )
+			final long nb_cds, final long nb_cds_nt_treat, final long nb_tr )
 	{
 		CellStyle cellStyle = wb.createCellStyle();
 		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
@@ -636,6 +636,6 @@ public class Excel_settings {
 
 		update_helper(es, test, null, null,0,0);
 		*/
-		agregate_excels(true);
+		agregate_excels(false);
 	}
 }

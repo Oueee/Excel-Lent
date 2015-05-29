@@ -11,14 +11,14 @@ public class Box {
 
   public List<TreeMap<String, Integer>> l;
 
-	public long nCds;
-	public long nCdsNot;
-    public long nbNucleotides;
+	public int nCds;
+	public int nCdsNot;
+    public int nbNucleotides;
     
   public Box(List<TreeMap<String, Integer>> l,
-             long noCdsTraitees,
-           	 long noCdsNonTraitees,
-             long nbNucleotides)
+             int noCdsTraitees,
+           	 int noCdsNonTraitees,
+             int nbNucleotides)
   {
     this.l = l;
     this.nCds = noCdsTraitees;
