@@ -153,7 +153,6 @@ public class Excel_settings {
           try{
 			      es.wb = WorkbookFactory.create(es.f);
 			      result = es.get_infos();
-			      es.wb.close();
 			    }catch(Exception e){
 			      Log.e("excel file " + es.f + " is malformed!");
 			    }
@@ -165,9 +164,6 @@ public class Excel_settings {
             boolean leaf = true;
             
             //Test if it's a leaf (id: a replicon)
-            if(!children)
-              return result;
-              
 		    for (File file : children) {
 		        try{//Bug once, don't know why
 		          if(!file.isFile())
@@ -221,7 +217,7 @@ public class Excel_settings {
 			        es.f.delete();
                 
                 //Then create a new one
-             es.f.createNewFile();
+                es.f.createNewFile();
 
                 //And fill it
 		        FileOutputStream fileout = new FileOutputStream(es.f);
@@ -231,6 +227,7 @@ public class Excel_settings {
 
 		        es.wb.write(fileout);
 		        fileout.close();
+		        
 		        result = b;
 		    }
         }
@@ -588,7 +585,7 @@ public class Excel_settings {
 
 			es.wb.write(fileout);
 			fileout.close();
-			es.wb.close();
+
 		//es.release(fchannel);
 		//// Secured part ended
 		/////////////////
