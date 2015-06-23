@@ -72,7 +72,7 @@ public class GUI  extends JFrame{
 	        
 	        ProgressBarListener pbl = new ProgressBarListener(progressBar, progressText);
 	        final ExcelLent excellent = new ExcelLent(pbl);
-					FileTree tree = new FileTree(ExcelLent.tree_root);
+			final FileTree tree = new FileTree(ExcelLent.tree_root);
 					JButton button = new JButton();
 					JButton b;
 

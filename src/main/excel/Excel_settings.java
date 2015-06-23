@@ -220,17 +220,15 @@ public class Excel_settings {
 		        if(es.f.exists())
 			        es.f.delete();
                 
-                //Then create a new one
-             es.f.createNewFile();
-
-                //And fill it
-		        FileOutputStream fileout = new FileOutputStream(es.f);
-		        
-		        if(!b.isEmpty())
-		          es.new_excel(b.l,b.nCds, b.nCdsNot, b.nbNucleotides);
-
-		        es.wb.write(fileout);
-		        fileout.close();
+		        if(!b.isEmpty()) {
+		            //Then create a new one
+                    es.f.createNewFile();
+                    //And fill it
+		            FileOutputStream fileout = new FileOutputStream(es.f);
+		            es.new_excel(b.l,b.nCds, b.nCdsNot, b.nbNucleotides);
+		            es.wb.write(fileout);
+		            fileout.close();
+		        }
 		        result = b;
 		    }
         }

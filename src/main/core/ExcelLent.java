@@ -23,11 +23,11 @@ public class ExcelLent implements Runnable {
     private static GenomeManager prokaryotesManager;
     private static boolean toDo[];
     private static boolean fine;
-
+    
     private static File project_root  = new File(System.getProperty("user.dir"));
     public static File tree_root      = new File(project_root, "tree");
     private static File urls_path     = new File(project_root, "urls_lists.json");
-
+    
     	ThreadPoolExecutor es;
     	ProgressBarListener listener;
 
@@ -91,7 +91,9 @@ public class ExcelLent implements Runnable {
           e.printStackTrace();
             //Log.e(e);
         }
-
+        
+        if(listener != null)
+            listener.setText("Everything done!");
 	}
 
 
