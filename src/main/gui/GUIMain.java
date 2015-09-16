@@ -37,7 +37,7 @@ import core.ExcelLent;
 @SuppressWarnings("serial")
 public class GUIMain extends JFrame{
 	public static void main(String[] args){
-		new GUIMain().initialize();		
+		new GUIMain().initialize();
 	}
 	
 	/**
@@ -127,8 +127,6 @@ public class GUIMain extends JFrame{
         ProgressBarListener pbl = new ProgressBarListener(progressBar, progressText);
         final ExcelLent excellent = new ExcelLent(pbl);
 		
-        tree.refresh();
-		
 		JPanel panel = new JPanel();
 		panel_2.add(panel, BorderLayout.NORTH);
 		panel.setLayout(new BorderLayout(0, 0));
@@ -161,8 +159,6 @@ public class GUIMain extends JFrame{
 		JPanel panel_1 = new JPanel();
 		panel_2.add(panel_1, BorderLayout.SOUTH);
 		panel_1.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
-		
-		//progressText = new JLabel("");
 		panel_1.add(progressText);
 		
 		final JFrame frame = this;
@@ -200,6 +196,7 @@ public class GUIMain extends JFrame{
 		contentPane.add(progressBar, BorderLayout.SOUTH);
 		
 		this.setVisible(true);
+		//tree.refresh();
 	}
 }
 

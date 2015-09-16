@@ -42,17 +42,18 @@ import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.Collections;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
+
 /**
  * Display a file system in a JTree view
  */
 @SuppressWarnings("serial")
-public class FileTree extends JPanel {
+public class FileTree extends JPanel implements Runnable {
   private JScrollPane scrollpane;
   private File root;
   private JTree tree;
@@ -64,7 +65,10 @@ public class FileTree extends JPanel {
     setLayout(new BorderLayout());
     scrollpane = new JScrollPane();
     add(scrollpane);
-    refresh();
+    //refresh();
+    
+    ExecutorService exec = Executors.newSingleThreadExecutor();//.newFixedThreadPool(1);
+    exec.execute(this);
   }
   
   public void refresh() {
@@ -128,6 +132,12 @@ public class FileTree extends JPanel {
 
   public Dimension getPreferredSize() {
     return new Dimension(200, 400);
+  }
+
+  @Override
+  public void run() {
+	// TODO Auto-generated method stub
+	refresh();
   }
 }
 
