@@ -36,44 +36,46 @@
 package gui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Container;
+import java.awt.Desktop;
 import java.awt.Dimension;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Vector;
+import java.util.concurrent.ArrayBlockingQueue;
 
-import javax.swing.BoxLayout;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 
-import util.Log;
 /**
  * Display a file system in a JTree view
- *
- * @version $Id: FileTree.java,v 1.9 2004/02/23 03:39:22 ian Exp $
- * @author Ian Darwin
  */
+@SuppressWarnings("serial")
 public class FileTree extends JPanel {
-  /** Construct a FileTree */
   private JScrollPane scrollpane;
   private File root;
-
+  private JTree tree;
+  private String OS;
+  
   public FileTree(File dir) {
+	OS = System.getProperty("os.name").toLowerCase();
     root = dir;
     setLayout(new BorderLayout());
     scrollpane = new JScrollPane();
     add(scrollpane);
     refresh();
   }
-
+  
   public void refresh() {
-    JTree tree = new JTree(addNodes(null, root));
+    tree = new JTree(addNodes(null, root));
 
     // Add a listener
     tree.addTreeSelectionListener(new TreeSelectionListener() {
@@ -86,20 +88,19 @@ public class FileTree extends JPanel {
     scrollpane.getViewport().removeAll();
     scrollpane.getViewport().add(tree);
   }
+  
   /** Add nodes from under "dir" into curTop. Highly recursive. */
   SwagTreeNode addNodes(SwagTreeNode curTop, File dir) {
-
-    SwagTreeNode curDir = new SwagTreeNode(dir);
-    if (curTop != null) { // should only be null at root
+	  SwagTreeNode curDir = new SwagTreeNode(dir);
+    if (curTop != null) // should only be null at root
       curTop.add(curDir);
-    }
-    Vector ol = new Vector();
+    
+    Vector<String> ol = new Vector<String>();
     String[] tmp = dir.list();
     for (int i = 0; i < tmp.length; i++)
       ol.addElement(tmp[i]);
     Collections.sort(ol, String.CASE_INSENSITIVE_ORDER);
-    File f;
-    Vector files = new Vector();
+    Vector<File> files = new Vector<File>();
     // Make two passes, one for Dirs and one for Files. This is #1.
     for (int i = 0; i < ol.size(); i++) {
       String thisObject = (String) ol.elementAt(i);
@@ -113,7 +114,7 @@ public class FileTree extends JPanel {
     // Pass two: for files.
     for (int fnum = 0; fnum < files.size(); fnum++) {
       if(!((File)files.elementAt(fnum)).getName().contains(".json"))
-        curDir.add((DefaultMutableTreeNode)new SwagTreeNode((File)files.elementAt(fnum)));
+        curDir.add((SwagTreeNode)new SwagTreeNode((File)files.elementAt(fnum)));
     }
     return curDir;
   }
@@ -126,3 +127,4 @@ public class FileTree extends JPanel {
     return new Dimension(200, 400);
   }
 }
+
