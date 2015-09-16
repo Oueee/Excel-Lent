@@ -36,25 +36,18 @@
 package gui;
 
 import java.awt.BorderLayout;
-import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.Vector;
-import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreePath;
-
 /**
  * Display a file system in a JTree view
  */
@@ -78,13 +71,23 @@ public class FileTree extends JPanel {
     tree = new JTree(addNodes(null, root));
 
     // Add a listener
-    tree.addTreeSelectionListener(new TreeSelectionListener() {
-      public void valueChanged(TreeSelectionEvent e) {
-        SwagTreeNode node = (SwagTreeNode) e
-            .getPath().getLastPathComponent();
-        node.click();
-      }
+    tree.addMouseListener(new MouseListener(){
+		public void mouseClicked(MouseEvent e) {
+			if(e.getButton() == MouseEvent.BUTTON1){
+				if(e.getClickCount() == 2){
+					if(tree.getLastSelectedPathComponent() != null){
+						SwagTreeNode node = (SwagTreeNode) tree.getLastSelectedPathComponent();
+					    node.click();
+					}
+				}
+			}
+		}
+		public void mouseEntered(MouseEvent e) {}
+		public void mouseExited(MouseEvent e) {}
+		public void mousePressed(MouseEvent e) {}
+		public void mouseReleased(MouseEvent e) {}
     });
+    
     scrollpane.getViewport().removeAll();
     scrollpane.getViewport().add(tree);
   }
