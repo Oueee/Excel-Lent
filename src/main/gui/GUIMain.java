@@ -29,28 +29,27 @@ import javax.swing.event.DocumentListener;
 import core.ExcelLent;
 
 /**
- * Cette classe démarre le programme et son interface graphique.
- * <br>Il n'est donc pas étonnant d'y retrouver de nombreux éléments servant uniquement à l'interface graphique.
- * <br>J'essaie néanmoins de regrouper tout l'aspect graphique vers le bas du fichier autant que possible.
+ * Cette classe dÃ©marre le programme et son interface graphique.
+ * <br>Il n'est donc pas Ã©tonnant d'y retrouver de nombreux Ã©lÃ©ments servant uniquement Ã  l'interface graphique.
+ * <br>J'essaie nÃ©anmoins de regrouper tout l'aspect graphique vers le bas du fichier autant que possible.
  * @author Alexandre Florentin
  */
 @SuppressWarnings("serial")
 public class GUIMain extends JFrame{
-
 	public static void main(String[] args){
 		new GUIMain().initialize();		
 	}
 	
 	/**
-	 * Création de toute l'interface graphique.
-	 * <br>On la laisse tout en bas, car elle est assez énorme.
+	 * CrÃ©ation de toute l'interface graphique.
+	 * <br>On la laisse tout en bas, car elle est assez Ã©norme.
 	 */
 	void initialize(){
 		try {
 			UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
 		} 
 		catch (Exception e) {
-			// Si on arrive pas à charger le thème, au pire c'est pas grave.
+			// Si on arrive pas Ã  charger le thÃ¨me, au pire c'est pas grave.
 			e.printStackTrace();
 		}
 		this.setTitle("BioInfo");
@@ -72,49 +71,36 @@ public class GUIMain extends JFrame{
 		
 		JMenu mnFichier = new JMenu("Fichier");
 		menuBar.add(mnFichier);
-		/*
-		JMenuItem compresser = new JMenuItem("Compresser le dossier Kingdom");
-		mnFichier.add(compresser);
-		compresser.addActionListener(new ActionListener(){
-				public void actionPerformed(ActionEvent arg0) {
-					try{
-						new ZipDirectory(new File("./Kingdom/"));
-						JOptionPane.showMessageDialog(null, "Le dossier Kingdom a bien été compressé", "Compression réussie", JOptionPane.INFORMATION_MESSAGE);
-					}catch(Exception e){
-						JOptionPane.showMessageDialog(null, "Le dossier Kingdom n'a pas pu être compresser", "Erreur de compression", JOptionPane.ERROR_MESSAGE);
-						e.printStackTrace();
-					}
-				}});
-		*/
+		
 		JMenuItem mntmFermer = new JMenuItem("Fermer");
 		mnFichier.add(mntmFermer);
 		mntmFermer.addActionListener(new ActionListener(){
 				public void actionPerformed(ActionEvent arg0) {
 					System.exit(0);}});
 		
-		JMenu parametres = new JMenu("Paramètres");
+		JMenu parametres = new JMenu("ParamÃ¨tres");
 		menuBar.add(parametres);
 		
-		JMenu mnArbre = new JMenu("Royaumes concernés");
+		JMenu mnArbre = new JMenu("Royaumes concernÃ©s");
 		parametres.add(mnArbre);
 		
 		//Ajout des CheckBox
-		StayOpenCBItem e_cb = new StayOpenCBItem("Eukaryotes");
+		final StayOpenCBItem e_cb = new StayOpenCBItem("Eukaryotes");
 		e_cb.setSelected(true);
 		mnArbre.add(e_cb);
 		
-		StayOpenCBItem p_cb = new StayOpenCBItem("Prokaryotes");
+		final StayOpenCBItem p_cb = new StayOpenCBItem("Prokaryotes");
 		p_cb.setSelected(true);
 		mnArbre.add(p_cb);
 		
-		StayOpenCBItem v_cb = new StayOpenCBItem("Virus");
+		final StayOpenCBItem v_cb = new StayOpenCBItem("Virus");
 		v_cb.setSelected(true);
 		mnArbre.add(v_cb);
 		
 		JMenu stats = new JMenu("Statistiques");
-		JRadioButton fine = new JRadioButton("Statistique fine");
+		final JRadioButton fine = new JRadioButton("Statistique fine");
 		fine.setSelected(true);
-		JRadioButton massive = new JRadioButton("Statistique massive");
+		final JRadioButton massive = new JRadioButton("Statistique massive");
 
 		ButtonGroup btnGrp = new ButtonGroup();
 		btnGrp.add(fine);
@@ -132,7 +118,7 @@ public class GUIMain extends JFrame{
 		contentPane.add(panel_2, BorderLayout.CENTER);
 		panel_2.setLayout(new BorderLayout(0, 0));
 		
-		FileTree tree = new FileTree(ExcelLent.tree_root);
+		final FileTree tree = new FileTree(ExcelLent.tree_root);
 		panel_2.add(tree, BorderLayout.CENTER);
 		
 		final JProgressBar progressBar = new JProgressBar(0, 100);
@@ -150,7 +136,7 @@ public class GUIMain extends JFrame{
 		JLabel lblRecherche = new JLabel("Recherche :");
 		panel.add(lblRecherche, BorderLayout.WEST);
 		
-		JTextField champRecherche = new JTextField();
+		final JTextField champRecherche = new JTextField();
 		panel.add(champRecherche, BorderLayout.CENTER);
 		champRecherche.setColumns(10);
 		champRecherche.getDocument().addDocumentListener(new DocumentListener() {
@@ -179,9 +165,9 @@ public class GUIMain extends JFrame{
 		//progressText = new JLabel("");
 		panel_1.add(progressText);
 		
-		JFrame frame = this;
-		JButton btnRun = new JButton("Run");
-		JButton btnRefresh = new JButton("Refresh Tree");
+		final JFrame frame = this;
+		final JButton btnRun = new JButton("Run");
+		final JButton btnRefresh = new JButton("Refresh Tree");
 		
 		panel_1.add(btnRun);
 		btnRun.addActionListener(new ActionListener(){
@@ -218,8 +204,8 @@ public class GUIMain extends JFrame{
 }
 
 /**
- * Cette classe, dont la source figure ci-dessous, sert à évider que le menu se ferme quand on coche une case.
- * <br>Par soucis d'honnêteté elle est laissée intacte et telle qu'elle est trouvée sur le site d'origine.
+ * Cette classe, dont la source figure ci-dessous, sert Ã© Ã©vider que le menu se ferme quand on coche une case.
+ * <br>Par soucis d'honnÃ©tetÃ© elle est laissÃ©e intacte et telle qu'elle est trouvÃ©e sur le site d'origine.
  * @author florentin
  * @see <a href="http://stackoverflow.com/questions/3759379/how-to-prevent-jpopupmenu-disappearing-when-checking-checkboxes-in-it">Origine du code</a>
  */
