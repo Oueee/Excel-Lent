@@ -36,6 +36,7 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -66,9 +67,14 @@ public class FileTree extends JPanel implements Runnable {
     scrollpane = new JScrollPane();
     add(scrollpane);
     //refresh();
-    
-    ExecutorService exec = Executors.newSingleThreadExecutor();//.newFixedThreadPool(1);
-    exec.execute(this);
+    tree = new JTree(addFirstNodes(null, root));
+    scrollpane.getViewport().add(tree);
+    threadedRefresh();
+  }
+  
+  public void threadedRefresh(){
+	  ExecutorService exec = Executors.newSingleThreadExecutor();//.newFixedThreadPool(1);
+	  exec.execute(this); 
   }
   
   public void refresh() {
@@ -94,6 +100,31 @@ public class FileTree extends JPanel implements Runnable {
     
     scrollpane.getViewport().removeAll();
     scrollpane.getViewport().add(tree);
+  }
+  
+  SwagTreeNode addFirstNodes(SwagTreeNode curTop, File dir){
+	  SwagTreeNode curDir = new SwagTreeNode(dir);
+	  if (curTop != null) // should only be null at root
+	      curTop.add(curDir);
+	  
+	  Vector<String> ol = new Vector<String>();
+	    String[] tmp = dir.list();
+	    for (int i = 0; i < tmp.length; i++)
+	      ol.addElement(tmp[i]);
+	    Collections.sort(ol, String.CASE_INSENSITIVE_ORDER);
+	    Vector<File> files = new Vector<File>();
+	    // Make two passes, one for Dirs and one for Files. This is #1.
+	    for (int i = 0; i < ol.size(); i++) {
+	      String thisObject = (String) ol.elementAt(i);
+	      File newDir = new File(dir, thisObject);
+	      files.addElement(newDir);
+	    }
+	    // Pass two: for files.
+	    for (int fnum = 0; fnum < files.size(); fnum++) {
+	      if(!((File)files.elementAt(fnum)).getName().contains(".json"))
+	        curDir.add((SwagTreeNode)new SwagTreeNode((File)files.elementAt(fnum)));
+	    }
+	    return curDir;
   }
   
   /** Add nodes from under "dir" into curTop. Highly recursive. */
@@ -136,8 +167,9 @@ public class FileTree extends JPanel implements Runnable {
 
   @Override
   public void run() {
-	// TODO Auto-generated method stub
+	this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 	refresh();
+	this.setCursor(Cursor.getDefaultCursor());
   }
 }
 

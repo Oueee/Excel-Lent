@@ -183,7 +183,8 @@ public class GUIMain extends JFrame{
 		panel_1.add(btnRefresh);
 		btnRefresh.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent arg0) {
-				tree.refresh();
+				//tree.refresh();
+				tree.threadedRefresh();
 			}});
 
 		JButton btnQuitter = new JButton("Exit");
