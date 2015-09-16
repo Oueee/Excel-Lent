@@ -68,6 +68,7 @@ public class FileTree extends JPanel implements Runnable {
     add(scrollpane);
     //refresh();
     tree = new JTree(addFirstNodes(null, root));
+    
     scrollpane.getViewport().add(tree);
     threadedRefresh();
   }
@@ -170,6 +171,10 @@ public class FileTree extends JPanel implements Runnable {
 	this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 	refresh();
 	this.setCursor(Cursor.getDefaultCursor());
+  }
+  
+  public void rechercheArbre(String s){
+	  //TODO Rechercher le string S dans l'arbre
   }
 }
 

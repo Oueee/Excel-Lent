@@ -131,7 +131,7 @@ public class GUIMain extends JFrame{
 		panel_2.add(panel, BorderLayout.NORTH);
 		panel.setLayout(new BorderLayout(0, 0));
 		
-		JLabel lblRecherche = new JLabel("Recherche :");
+		/*JLabel lblRecherche = new JLabel("Recherche :");
 		panel.add(lblRecherche, BorderLayout.WEST);
 		
 		final JTextField champRecherche = new JTextField();
@@ -155,7 +155,7 @@ public class GUIMain extends JFrame{
 		        updateData();
 		    }
 		});
-		
+		*/
 		JPanel panel_1 = new JPanel();
 		panel_2.add(panel_1, BorderLayout.SOUTH);
 		panel_1.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
