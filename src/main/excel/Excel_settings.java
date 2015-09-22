@@ -1,5 +1,6 @@
 package excel;
 
+import java.io.Console;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileInputStream;
@@ -9,6 +10,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.nio.channels.FileLock;
 import java.nio.channels.FileChannel;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
@@ -18,7 +20,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.lang.reflect.Array;
 
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -253,7 +259,8 @@ public class Excel_settings {
 		Sheet sheet1 = wb.createSheet(safename);
 		CellStyle cellStyle = wb.createCellStyle();
 		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
-
+//		cellStyle.setFillBackgroundColor(HSSFColor.WHITE.index);
+//		cellStyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
 		Row row = sheet1.createRow(0);
 
 		// Name
@@ -333,6 +340,8 @@ public class Excel_settings {
 		cell.setCellValue("Total");
 		// -----------------------------------------------------------------------
     fill_excel(diff,sheet1,nb_cds,nb_cds_nt_treat,nb_tr);
+	
+   
 	}
 
 	private FileChannel lock(FileOutputStream fileout) throws IOException, InterruptedException {
@@ -392,10 +401,9 @@ public class Excel_settings {
 			final long nb_cds, final long nb_cds_nt_treat, final long nb_tr )
 	{
 		CellStyle cellStyle = wb.createCellStyle();
-		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
-    
-    CellStyle cellStyle_percentage = wb.createCellStyle();
-    DataFormat format = wb.createDataFormat();
+		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);   
+        CellStyle cellStyle_percentage = wb.createCellStyle();
+        DataFormat format = wb.createDataFormat();
 		cellStyle_percentage.setDataFormat(format.getFormat("0.00"));
 		cellStyle_percentage.setAlignment(CellStyle.ALIGN_CENTER);
 		
@@ -435,6 +443,7 @@ public class Excel_settings {
 			// sum of the column count
 			cell.setCellFormula("SUM("+ letter +"8:"+ letter +"71)");
 			j+=2;
+		
 		}
 
   /*
@@ -473,6 +482,58 @@ public class Excel_settings {
 		for(int i = 0 ; i < 7 ; i++)
 			sheet1.autoSizeColumn(i,true);
 			
+		//code by CJO deb
+        	Sheet sheetstyle = wb.getSheetAt(0);
+        	Row rowstyle = sheetstyle.getRow(0);
+        	Cell mycellstyle = rowstyle.getCell((short) 0);
+		  // on parcourt une ligne sur deux pour la mise en forme
+		  for (int i=6;i < sheetstyle.getLastRowNum();i+=2)
+		  {
+			 rowstyle=sheetstyle.getRow(i);
+   		 	//on parcours les colonnes presentes dans le tableau
+			 for (int j1=0;j1 < rowstyle.getLastCellNum();j1++) {
+				 
+   		 		DataFormat format2 = wb.createDataFormat();
+   		 		CellStyle mystyle = wb.createCellStyle();
+   		 		mycellstyle = rowstyle.getCell(j1);
+   		 		//on met de la couleur grise dans la case en background
+   		 		mystyle.setFillForegroundColor(HSSFColor.GREY_25_PERCENT.index);
+   		 		mystyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+   		 		// on ajuste le format en fonction de la colonne 
+   		 		// ici 1 et 3 et 5 sont au format "0"
+   		 		if ((j1!= 1) && (j1!= 3) && (j1!= 5)){
+   		 			mystyle.setDataFormat(format2.getFormat("0.00"));
+   		 		}
+   		 		else
+   		 		{
+   		 			mystyle.setDataFormat(format2.getFormat("0"));
+            
+   		 		}
+   		 		mystyle.setAlignment(CellStyle.ALIGN_CENTER);
+   		 		mycellstyle.setCellStyle(mystyle);
+   		 		
+   		 	}
+   		 
+		  }
+		  //pour la derniere ligne on met le resultat en rouge
+		  rowstyle=sheetstyle.getRow(sheetstyle.getLastRowNum());
+		  for (int j1=0;j1 < rowstyle.getLastCellNum();j1++) {
+			  	
+			  if ((j1== 1) || (j1== 3) || (j1== 5)){
+				  	
+				  	DataFormat format2 = wb.createDataFormat();
+	 		 		CellStyle mystyle = wb.createCellStyle();
+	 		 		Font fonte = wb.createFont();
+	 		 		fonte.setBoldweight(Font.BOLDWEIGHT_BOLD);
+	 		 		fonte.setColor(Font.COLOR_RED);
+	 		 		mycellstyle = rowstyle.getCell(j1);
+ 		 			mystyle.setDataFormat(format2.getFormat("0"));
+ 		 			mystyle.setFont(fonte);
+ 		 			mystyle.setAlignment(CellStyle.ALIGN_CENTER);
+ 		 			mycellstyle.setCellStyle(mystyle);
+			  }	
+		  }
+		//code by CJO fin
 	}
 
 	/**
