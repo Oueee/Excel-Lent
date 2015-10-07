@@ -10,19 +10,15 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.nio.channels.FileLock;
 import java.nio.channels.FileChannel;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.TreeMap;
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.lang.reflect.Array;
 
-import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -482,7 +478,7 @@ public class Excel_settings {
 		for(int i = 0 ; i < 7 ; i++)
 			sheet1.autoSizeColumn(i,true);
 			
-		//code by CJO deb
+		//code by CJO deb  
         	Sheet sheetstyle = wb.getSheetAt(0);
         	Row rowstyle = sheetstyle.getRow(0);
         	Cell mycellstyle = rowstyle.getCell((short) 0);
