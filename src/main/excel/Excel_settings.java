@@ -124,13 +124,13 @@ public class Excel_settings {
 	public Box get_infos() {
 		Sheet sheet1 = wb.getSheetAt(0);
 
-		List<TreeMap<String,Integer>> list = new ArrayList<TreeMap<String,Integer>> (3);
+		List<TreeMap<String,Integer>> list = new ArrayList<TreeMap<String,Integer>> (6);
   
 		long nbcds = (long)sheet1.getRow(2).getCell(1).getNumericCellValue();
 		long nbcds_no = (long)sheet1.getRow(4).getCell(1).getNumericCellValue();
 		long trinucle = (long)sheet1.getRow(3).getCell(1).getNumericCellValue();
 
-		for (int k=1 ; k < 6 ; k+=2)
+		for (int k=1 ; k < 9 ;)
 		{
 			TreeMap<String, Integer> m = new TreeMap<String,Integer>();
 			for (int i = 7 ; i < AnalysisResults.CDS_STRINGS.length + 7 ; i++)
@@ -139,6 +139,10 @@ public class Excel_settings {
 				m.put(AnalysisResults.CDS_STRINGS[i-7], (int)nb);
 			}
 			list.add(m);
+			if (k<6)
+				k+=2;
+			else
+				k+=1;
 		}
 
 		return new Box(list,nbcds,nbcds_no,trinucle);
@@ -270,17 +274,17 @@ public class Excel_settings {
 		// CDS/Trinucleotides NB
 		// --------------------------------------------------
 		row = sheet1.createRow(2);
-		row.createCell(0).setCellValue("Nb CDS traités");
+		row.createCell(0).setCellValue("Nb CDS traites");
 		Cell cell = row.createCell(1);
 		cell.setCellStyle(cellStyle);
 
 		row = sheet1.createRow(3);
-		row.createCell(0).setCellValue("Nb Trinucléotides");
+		row.createCell(0).setCellValue("Nb Trinucleotides");
 		cell = row.createCell(1);
 		cell.setCellStyle(cellStyle);
 
 		row = sheet1.createRow(4);
-		row.createCell(0).setCellValue("Nb CDS non traités");
+		row.createCell(0).setCellValue("Nb CDS non traites");
 		cell = row.createCell(1);
 		cell.setCellStyle(cellStyle);
 		// --------------------------------------------------
@@ -291,7 +295,7 @@ public class Excel_settings {
 		row = sheet1.createRow(6);
 		cell = row.createCell(0);
 		cell.setCellStyle(cellStyle);
-		cell.setCellValue("Trinucléotides");
+		cell.setCellValue("Trinucleotides");
 		cell = row.createCell(1);
 		cell.setCellStyle(cellStyle);
 		cell.setCellValue("Nb Ph0");
@@ -310,7 +314,15 @@ public class Excel_settings {
 		cell = row.createCell(6);
 		cell.setCellStyle(cellStyle);
 		cell.setCellValue("Pb Ph2");
-
+		cell = row.createCell(7);
+		cell.setCellValue("Pr Ph0");
+		cell.setCellStyle(cellStyle);
+		cell = row.createCell(8);
+		cell.setCellValue("Pr Ph1");
+		cell.setCellStyle(cellStyle);
+		cell = row.createCell(9);
+		cell.setCellValue("Pr Ph2");
+		cell.setCellStyle(cellStyle);
 
 		// Key of map
 		i = 7;
@@ -394,8 +406,8 @@ public class Excel_settings {
 		CellStyle cellStyle = wb.createCellStyle();
 		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
     
-    CellStyle cellStyle_percentage = wb.createCellStyle();
-    DataFormat format = wb.createDataFormat();
+		CellStyle cellStyle_percentage = wb.createCellStyle();
+		DataFormat format = wb.createDataFormat();
 		cellStyle_percentage.setDataFormat(format.getFormat("0.00"));
 		cellStyle_percentage.setAlignment(CellStyle.ALIGN_CENTER);
 		
@@ -405,11 +417,11 @@ public class Excel_settings {
 		int j = 1; // current column
 
 		int phase = 0;
-		final String[] phases = {"B","D","F"}; // count phases
-		final String[] phases_perc = {"C","E","G"}; // percentage phases
+		final String[] phases = {"B","D","F","H","I","J"}; // count phases
 
 		// for the 3 phases
-		for (TreeMap<String,Integer> tree : value)
+		List<TreeMap<String,Integer>> val = value.subList(0, 3);
+		for (TreeMap<String,Integer> tree : val)
 		{
 			int current = 0 + min;
 			for (Map.Entry<String, Integer> entry : tree.entrySet())
@@ -436,8 +448,25 @@ public class Excel_settings {
 			cell.setCellFormula("SUM("+ letter +"8:"+ letter +"71)");
 			j+=2;
 		}
+		val = value.subList(3, 6);
+		// for the three phases' pr
+		for (TreeMap<String,Integer> tree : val)
+		{
+			int current = 0 + min;
+			for (Map.Entry<String, Integer> entry : tree.entrySet())
+			{ // for each trinucleotides
+				//Log.d(entry.getValue());
+				Row row = sheet1.getRow(current++);
+				
+				//Put count
+				Cell cell = row.createCell(j);
+				cell.setCellStyle(cellStyle);
+				cell.setCellValue(entry.getValue());
+			}
+			j++;
+		}
 
-  /*
+	  /*
 		for (int i = 0,cur=2 ; i < 3 && cur<7 ; i++,cur+=2)
 		{
 			String letter = phases[i];
@@ -450,10 +479,10 @@ public class Excel_settings {
 				cell.setCellFormula(letter + (k+1) + "/" + letter + "72");
 			}
 		}
-    */
-    Row row;
-    Cell cell;
-    row = sheet1.getRow(2);
+	    */
+	    Row row;
+	    Cell cell;
+	    row = sheet1.getRow(2);
 		cell = row.createCell(1);
 		cell.setCellStyle(cellStyle);
 		cell.setCellValue(nb_cds);
@@ -470,7 +499,7 @@ public class Excel_settings {
 		cell.setCellValue(nb_cds_nt_treat);
 		
 				// not really effecient...
-		for(int i = 0 ; i < 7 ; i++)
+		for(int i = 0 ; i < 10 ; i++)
 			sheet1.autoSizeColumn(i,true);
 			
 	}
@@ -517,10 +546,30 @@ public class Excel_settings {
 		diff.add(nucleotide_to_number_1);
 		diff.add(nucleotide_to_number_2);
 		diff.add(nucleotide_to_number_3);
-
+		
+		TreeMap<String,Integer> pr1 = new TreeMap<String,Integer>();
+		TreeMap<String,Integer> pr2 = new TreeMap<String,Integer>();
+		TreeMap<String,Integer> pr3 = new TreeMap<String,Integer>();
+		
 		int nb_tr = 0;
 		for (Map.Entry<String, Integer> entry : nucleotide_to_number_1.entrySet())
+		{
 			nb_tr += entry.getValue();
+			int nbp1 = entry.getValue();
+			int nbp2 = nucleotide_to_number_2.get(entry.getKey());
+			int nbp3 = nucleotide_to_number_3.get(entry.getKey());
+			boolean[] t = new boolean[3];
+			t[0]= nbp1>=nbp2 && nbp1>=nbp3; // if it is Pr
+			t[1]= nbp2>=nbp1 && nbp2>=nbp3;
+			t[2]= nbp3>=nbp1 && nbp3>=nbp2;
+			pr1.put(entry.getKey(), (t[0])?1:0);
+			pr2.put(entry.getKey(), (t[1])?1:0);
+			pr3.put(entry.getKey(), (t[2])?1:0);
+		}
+		
+		diff.add(pr1);
+		diff.add(pr2);
+		diff.add(pr3);
 
 		//If it's an update (and not a new excel file)
 		//We check the difference, otherwise the difference is just the new.
