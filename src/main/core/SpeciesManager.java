@@ -97,6 +97,9 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 												 (TreeMap)result.getPhase0Frequencies(),
 												 (TreeMap)result.getPhase1Frequencies(),
 							   				 (TreeMap)result.getPhase2Frequencies(),
+					(TreeMap)result.phase0Preferences,
+					(TreeMap)result.phase1Preferences,
+					(TreeMap)result.phase2Preferences,
 												 result.getNoCdsTraitees(),
 												 result.getNoCdsNonTraitees());
 

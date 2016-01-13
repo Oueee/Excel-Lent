@@ -8,10 +8,11 @@ import javax.swing.JLabel;
 
 public class MainConsole{
   public static void main(String[] args) {
-    if(args.length < 4) {
-      Log.e("\narguments to give: 0|1 0|1 0|1 0|1\n1 to do it, 0 to do not.\nviruses eukaryotes prokaryotes massive|fine");
-      Log.e("Enjoy ;)");
-      Log.exit();
+    boolean[] finalArgs = {true, true, true, true};
+
+    if(args.length >= 4) {
+      for (int i = 0; i < 4; i++)
+        finalArgs[i] = args[i].equals("1") ? true : false;
     }
 
     try{
@@ -23,10 +24,10 @@ public class MainConsole{
       Log.i("/!\\ Stop with a ^C... /!\\");
       Log.i("#########################");
 
-      excellent.setToDo(args[0].equals("1") ? true : false,
-                        args[1].equals("1") ? true : false,
-                        args[2].equals("1") ? true : false,
-                        args[3].equals("1") ? true : false);
+      excellent.setToDo(finalArgs[0],
+                        finalArgs[1],
+                        finalArgs[2],
+                        finalArgs[3]);
 
       new Thread(excellent).start();
 
