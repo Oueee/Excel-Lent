@@ -181,7 +181,6 @@ public class GUIMain extends JFrame{
 				new Thread(excellent).start();
 				
 				frame.setCursor(Cursor.getDefaultCursor());
-				btnRun.setEnabled(true);
 				btnRefresh.setEnabled(true);
 			}});
 		panel_1.add(btnRefresh);
