@@ -57,61 +57,66 @@ public class Connector {
 			boolean ignoring = false;
 			Header currentHeader;
 			CDS currentCDS = null;
-			while ((line = reader.readLine()) != null) {
+			try {
+				while ((line = reader.readLine()) != null) {
 
-				// check if header
-				if (line.startsWith(">")) {
-					// line is header
-					// last CDS has ended, so process it
-					if (currentCDS != null) {
-						if (!ignoring) {
-							if (currentCDS.isCompleteAndCorrect()) {
-								results.update(currentCDS);
-							} else {
+					// check if header
+					if (line.startsWith(">")) {
+						// line is header
+						// last CDS has ended, so process it
+						if (currentCDS != null) {
+							if (!ignoring) {
+								if (currentCDS.isCompleteAndCorrect()) {
+									results.update(currentCDS);
+								} else {
 								/*
 								System.out
 										.println("Encountered bad CDS for header "
 												+ currentCDS.getHeader());
 								*/
-								results.foundBadCDS();
+									results.foundBadCDS();
+								}
 							}
+
 						}
+						// analyse new header
+						currentHeader = new Header(line);
+						if (currentHeader.isWellFormed()) {
+							// header good. parse rest of CDS until next header
+							ignoring = false;
 
-					}
-					// analyse new header
-					currentHeader = new Header(line);
-					if (currentHeader.isWellFormed()) {
-						// header good. parse rest of CDS until next header
-						ignoring = false;
-
-						// create cds
-						currentCDS = new CDS(currentHeader);
-					} else {
-						// header bad. ignore CDS until next header
-						ignoring = true;
-						results.foundBadCDS();
-					}
-				} else if (line.equals("")) {
-					// last line reached; process CDS
-					if (!ignoring) {
-						if (currentCDS.isCompleteAndCorrect()) {
-							results.update(currentCDS);
+							// create cds
+							currentCDS = new CDS(currentHeader);
 						} else {
+							// header bad. ignore CDS until next header
+							ignoring = true;
+							results.foundBadCDS();
+						}
+					} else if (line.equals("")) {
+						// last line reached; process CDS
+						if (!ignoring) {
+							if (currentCDS.isCompleteAndCorrect()) {
+								results.update(currentCDS);
+							} else {
 							/*
 							System.out
 									.println("Encountered bad CDS for header "
 											+ currentCDS.getHeader());
 							*/
-							results.foundBadCDS();
+								results.foundBadCDS();
+							}
+						}
+					} else {
+						// this is a normal CDS line
+						if (!ignoring) {
+							currentCDS.add(line);;
 						}
 					}
-				} else {
-					// this is a normal CDS line
-					if (!ignoring) {
-						currentCDS.add(line);;
-					}
 				}
-
+			}
+			catch(java.io.IOException e) {
+				Log.e("Premature EOF!");
+				results = null;
 			}
 			reader.close();
 		} else {

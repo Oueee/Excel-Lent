@@ -91,19 +91,23 @@ public class SpeciesManager extends SwingWorker<Void, Void> {
 				continue;
 
 			result 				= connector.downloadAndAnalyseReplicon(repliconID);
-			es		 				= new Excel_settings(path_replicon, path);
 
-			Excel_settings.update_helper(es,
-												 (TreeMap)result.getPhase0Frequencies(),
-												 (TreeMap)result.getPhase1Frequencies(),
-							   				 (TreeMap)result.getPhase2Frequencies(),
-					(TreeMap)result.phase0Preferences,
-					(TreeMap)result.phase1Preferences,
-					(TreeMap)result.phase2Preferences,
-												 result.getNoCdsTraitees(),
-												 result.getNoCdsNonTraitees());
+			if(result != null) {
+				es		 				= new Excel_settings(path_replicon, path);
 
-			path.remove(path.size()-1);
+				Excel_settings.update_helper(es,
+						(TreeMap)result.getPhase0Frequencies(),
+						(TreeMap)result.getPhase1Frequencies(),
+						(TreeMap)result.getPhase2Frequencies(),
+						(TreeMap)result.phase0Preferences,
+						(TreeMap)result.phase1Preferences,
+						(TreeMap)result.phase2Preferences,
+						result.getNoCdsTraitees(),
+						result.getNoCdsNonTraitees());
+
+				path.remove(path.size()-1);
+			}
+
 		}
 	}	catch(Exception e){
 			Log.e(e);
