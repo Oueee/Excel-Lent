@@ -466,7 +466,7 @@ public class Excel_settings {
                 //Put count
                 Cell cell = row.createCell(j);
                 cell.setCellStyle(cellStyle);
-                cell.setCellValue(entry.getValue());
+                cell.setCellValue(new Integer(entry.getValue()));
             }
             j++;
         }
