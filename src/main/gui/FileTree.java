@@ -100,8 +100,11 @@ public class FileTree extends JPanel {
     
     Vector<String> ol = new Vector<String>();
     String[] tmp = dir.list();
-    for (int i = 0; i < tmp.length; i++)
-      ol.addElement(tmp[i]);
+    if(tmp != null) {
+      for (int i = 0; i < tmp.length; i++)
+        ol.addElement(tmp[i]);
+    }
+
     Collections.sort(ol, String.CASE_INSENSITIVE_ORDER);
     Vector<File> files = new Vector<File>();
     // Make two passes, one for Dirs and one for Files. This is #1.
