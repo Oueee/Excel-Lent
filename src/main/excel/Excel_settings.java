@@ -526,7 +526,7 @@ public class Excel_settings {
                 mystyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
                 // on ajuste le format en fonction de la colonne
                 // ici 1 et 3 et 5 sont au format "0"
-                if ((j1!= 1) && (j1!= 3) && (j1!= 5)){
+                if ((j1== 2) && (j1== 4) && (j1== 6)){
                     mystyle.setDataFormat(format2.getFormat("0.00"));
                 }
                 else
