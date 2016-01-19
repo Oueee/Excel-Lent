@@ -132,7 +132,7 @@ public class Excel_settings {
         long nbcds_no = (long)sheet1.getRow(4).getCell(1).getNumericCellValue();
         long trinucle = (long)sheet1.getRow(3).getCell(1).getNumericCellValue();
 
-        for (int k=1 ; k < 9 ;)
+        for (int k=1 ; k <= 9 ;)
         {
             TreeMap<String, Integer> m = new TreeMap<String,Integer>();
             for (int i = 7 ; i < AnalysisResults.CDS_STRINGS.length + 7 ; i++)
@@ -623,7 +623,7 @@ public class Excel_settings {
             TreeMap<String,Integer> old_tab;
             TreeMap<String,Integer> diff_tab;
 
-            for(int i = 0; i < 3; i++) {
+            for(int i = 0; i < 6; i++) {
                 old_tab = old_tabs[i];
                 diff_tab = diff.get(i);
                 //diff = new - old
@@ -659,9 +659,11 @@ public class Excel_settings {
     {
 
         boolean exist = true;
+	System.out.println(es.f);
 
         if(!es.f.exists()) {
             exist = false;
+	    es.f.getParentFile().mkdirs();
             es.f.createNewFile();
         }
 
