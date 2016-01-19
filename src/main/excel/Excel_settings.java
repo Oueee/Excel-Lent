@@ -503,10 +503,6 @@ public class Excel_settings {
         cell.setCellStyle(cellStyle);
         cell.setCellValue(nb_cds_nt_treat);
 
-        // not really effecient...
-        for(int i = 0 ; i < 10 ; i++)
-            sheet1.autoSizeColumn(i,true);
-
         //code by CJO deb
         Sheet sheetstyle = wb.getSheetAt(0);
         Row rowstyle = sheetstyle.getRow(0);
@@ -559,6 +555,10 @@ public class Excel_settings {
             }
         }
         //code by CJO fin
+
+        // not really effecient...
+        for(int i = 0 ; i < 10 ; i++)
+            sheet1.autoSizeColumn(i,true);
     }
 
     /**
