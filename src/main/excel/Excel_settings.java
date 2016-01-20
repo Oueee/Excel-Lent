@@ -449,7 +449,7 @@ public class Excel_settings {
             String letter = phases[phase++];
             cell.setCellStyle(cellStyle);
             // sum of the column count
-            cell.setCellFormula("SUM("+ letter +"8:"+ letter +"71)");
+            cell.setCellValue(nb_cds);
             j+=2;
 
         }
